@@ -5,6 +5,10 @@
     text-align: center;
   }
 
+label {
+    color: black;
+}
+
 .product-page {
     display: flex;
     gap: 2rem;
