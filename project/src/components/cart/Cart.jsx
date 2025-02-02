@@ -5,15 +5,14 @@ const CartScreen = () => {
   const [cart, setCart] = useState([]);
 
   useEffect(() => {
-    // Retrieve cart from localStorage on component mount
     const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
     setCart(storedCart);
   }, []);
 
   const handleRemoveFromCart = (id) => {
     const updatedCart = cart.filter((item) => item.id !== id);
-    setCart(updatedCart); // Update the local state
-    localStorage.setItem("cart", JSON.stringify(updatedCart)); // Update localStorage
+    setCart(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
   useEffect(() => {
@@ -21,23 +20,22 @@ const CartScreen = () => {
 
     const handleClick = (event) => {
       const id = event.target.getAttribute("data-id");
-      handleRemoveFromCart(parseInt(id, 10)); // Call the handler with the item ID
+      handleRemoveFromCart(parseInt(id, 10));
     };
 
     removeButtons.forEach((button) => {
       button.addEventListener("click", handleClick);
     });
 
-    // Cleanup: Remove event listeners on unmount
     return () => {
       removeButtons.forEach((button) => {
         button.removeEventListener("click", handleClick);
       });
     };
-  }, [cart]); // Re-run this effect when `cart` changes
+  }, [cart]);
 
   const totalPrice = cart.reduce((total, item) => {
-    const price = parseFloat(item.price.slice(1)); // Remove '$' and convert to number
+    const price = parseFloat(item.price.slice(1));
     return total + price * item.quantity;
   }, 0);
 
