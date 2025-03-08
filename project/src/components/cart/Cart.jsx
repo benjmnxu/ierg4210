@@ -3,41 +3,66 @@ import "./Cart.css";
 
 const CartScreen = () => {
   const [cart, setCart] = useState([]);
+  const [loading, setLoading] = useState(false);
+  // const [totalPrice, setTotalPrice] = useState(0);
+  const [cartFetched, setCartFetched] = useState(false); // Prevents infinite API calls
 
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
     setCart(storedCart);
   }, []);
 
-  const handleRemoveFromCart = (id) => {
-    const updatedCart = cart.filter((item) => item.id !== id);
+  useEffect(() => {
+    if (cart.length === 0 || cartFetched) return; // Prevents unnecessary API calls
+
+    const fetchProductDetails = async () => {
+      setLoading(true);
+      try {
+        const updatedCart = await Promise.all(
+          cart.map(async (item) => {
+            const response = await fetch(`http://localhost:3000/api/products/${item.pid}`);
+            const productData = await response.json();
+
+            // Ensure we extract the first item in the list
+            const product = productData[0] || {};
+
+            return {
+              ...item,
+              name: product.name || "Unknown Product",
+              price: parseFloat(product.price) || 0,
+            };
+          })
+        );
+
+        setCart(updatedCart);
+        // setTotalPrice(updatedCart.reduce((sum, item) => sum + item.price * item.quantity, 0));
+        setCartFetched(true); // Mark as fetched to avoid infinite loops
+      } catch (error) {
+        console.error("Error fetching product details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProductDetails();
+  }, [cart, cartFetched]);
+
+  const handleQuantityChange = (pid, newQuantity) => {
+    if (newQuantity < 0) return; // Prevents negative values
+
+    const updatedCart = cart.map(item =>
+      item.pid === pid ? { ...item, quantity: newQuantity } : item
+    ).filter(item => item.quantity > 0); // Removes items with 0 quantity
+
     setCart(updatedCart);
     localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
-  useEffect(() => {
-    const removeButtons = document.querySelectorAll(".remove-btn");
-
-    const handleClick = (event) => {
-      const id = event.target.getAttribute("data-id");
-      handleRemoveFromCart(parseInt(id, 10));
-    };
-
-    removeButtons.forEach((button) => {
-      button.addEventListener("click", handleClick);
-    });
-
-    return () => {
-      removeButtons.forEach((button) => {
-        button.removeEventListener("click", handleClick);
-      });
-    };
-  }, [cart]);
-
-  const totalPrice = cart.reduce((total, item) => {
-    const price = parseFloat(item.price.slice(1));
-    return total + price * item.quantity;
-  }, 0);
+  const handleRemoveFromCart = (pid) => {
+    const updatedCart = cart.filter(item => item.pid !== pid);
+    setCart(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+  };
 
   if (cart.length === 0) {
     return <h2>Your cart is empty.</h2>;
@@ -46,26 +71,33 @@ const CartScreen = () => {
   return (
     <div className="cart-screen">
       <h1>Shopping Cart</h1>
+      {loading ? <p>Loading product details...</p> : null}
       <div className="cart-items">
         {cart.map((item) => (
-          <div className="cart-item" key={item.id}>
+          <div className="cart-item" key={item.pid}>
             <div>
-              <h2>{item.name}</h2>
-              <p>Price: {item.price}</p>
-              <p>Quantity: {item.quantity}</p>
-              <button
-                className="remove-btn"
-                data-id={item.id}
-              >
+              <h2>{item.name || "Loading..."}</h2>
+              <p>Price: ${item.price?.toFixed(2) || "Fetching..."}</p>
+              <div className="quantity-controls">
+                <button onClick={() => handleQuantityChange(item.pid, item.quantity - 1)}>-</button>
+                <input
+                  type="number"
+                  min="0"
+                  value={item.quantity}
+                  onChange={(e) => handleQuantityChange(item.pid, parseInt(e.target.value, 10) || 0)}
+                />
+                <button onClick={() => handleQuantityChange(item.pid, item.quantity + 1)}>+</button>
+              </div>
+              <button className="remove-btn" onClick={() => handleRemoveFromCart(item.pid)}>
                 Remove
               </button>
             </div>
           </div>
         ))}
       </div>
-      <h2>Total: ${totalPrice.toFixed(2)}</h2>
+      <h2>Total: ${cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}</h2>
 
-      <button>Checkout</button>
+      <button disabled={loading}>Checkout</button>
     </div>
   );
 };
