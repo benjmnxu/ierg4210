@@ -332,7 +332,6 @@ const AdminPanel = () => {
         )}
       </div>
 
-      {/* Render Tables for Products/Categories */}
       <div className="table-container">
         {mode === "products" ? (
           <table className="styled-table">
