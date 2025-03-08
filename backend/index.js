@@ -11,7 +11,7 @@ require("dotenv").config();
 
 const upload = multer({ storage: multer.memoryStorage() });
 const app = express();
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(cors({ credentials: true }));
 app.use(express.json());
 
 const s3 = new AWS.S3({
@@ -21,11 +21,11 @@ const s3 = new AWS.S3({
 });
 
 const db = mysql.createPool({
-  host: "127.0.0.1",
+  host: process.env.HOST,
   user: process.env.USER,
   password: process.env.PASSWORD,
   database: process.env.NAME,
-  port: 3307,
+  // port: 3307,
   connectionLimit: 10,
 });
 
