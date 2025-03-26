@@ -1,0 +1,77 @@
+.login-container {
+  max-width: 400px;
+  margin: 60px auto;
+  padding: 30px;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  color: #333;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-title {
+  text-align: center;
+  color: #222;
+  margin: 0 0 20px 0;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-form label {
+  margin-top: 15px;
+  font-weight: bold;
+  color: #444;
+}
+
+.login-form input {
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  color: #222;
+  background-color: #fff;
+}
+
+.login-button {
+  margin-top: 20px;
+  padding: 12px;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.login-button:hover {
+  background-color: #005fa3;
+}
+
+.login-error {
+  color: #d9534f;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.login-success {
+  color: green;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.toggle-auth {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.toggle-auth button {
+  background: none;
+  border: none;
+  color: #0077cc;
+  cursor: pointer;
+  text-decoration: underline;
+  font: inherit;
+}

@@ -6,6 +6,9 @@ import ProductList from "./components/productlist/ProductList"
 import Product from "./components/product/Product"
 import Cart from "./components/cart/Cart"
 import AdminPanel from "./components/admin/Admin"
+import AuthPage from "./components/auth/Auth"
+import ChangePasswordPage from "./components/changePassword/ChangePassword"
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -16,7 +19,17 @@ function App() {
         <Route path="/origin/:category" element={<ProductList />} />
         <Route path="/product/:id" element={<Product />} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="/admin" element={<AdminPanel />} />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute adminOnly={true}>
+              <AdminPanel />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/login" element={<AuthPage />} />
+        <Route path="/change-password" element={<ChangePasswordPage />} />
+        <Route path="/unauthorized" element={<div>You do not have access to this page.</div>} />
       </Routes>
     </div>
   );

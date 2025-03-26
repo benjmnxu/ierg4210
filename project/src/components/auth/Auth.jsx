@@ -1,0 +1,120 @@
+import { useState } from 'react';
+import "./style.css";
+
+function AuthPage() {
+  const [mode, setMode] = useState("login");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [adminCode, setAdminCode] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    const endpoint = mode === "signup" ? "signup" : "login";
+    const payload =
+      mode === "signup"
+        ? { email, password, name, admin_code: adminCode }
+        : { email, password };
+
+    try {
+      const response = await fetch(`http://localhost:3000/api/${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        credentials: "include"
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || `${mode === "signup" ? "Signup" : "Login"} failed`);
+      }
+
+      if (mode === "signup") {
+        setSuccessMsg("Signup successful! You're now logged in.");
+      }
+
+      window.location.href = "/admin"; // or "/"
+    } catch (err) {
+      setErrorMsg(err.message);
+    }
+  };
+
+  return (
+    <div className="login-container">
+      <h2 className="login-title">{mode === "login" ? "Login" : "Sign Up"}</h2>
+
+      {errorMsg && <p className="login-error">{errorMsg}</p>}
+      {successMsg && <p className="login-success">{successMsg}</p>}
+
+      <form className="login-form" onSubmit={handleSubmit}>
+        {mode === "signup" && (
+          <>
+            <label htmlFor="name">Name:</label>
+            <input
+              type="text"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </>
+        )}
+
+        <label htmlFor="email">Email:</label>
+        <input
+          type="email"
+          id="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <label htmlFor="password">Password:</label>
+        <input
+          type="password"
+          id="password"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        {mode === "signup" && (
+          <>
+            <label htmlFor="adminCode">Admin Code (optional):</label>
+            <input
+              type="text"
+              id="adminCode"
+              value={adminCode}
+              onChange={(e) => setAdminCode(e.target.value)}
+            />
+          </>
+        )}
+
+        <button type="submit" className="login-button">
+          {mode === "login" ? "Login" : "Sign Up"}
+        </button>
+      </form>
+
+      <div className="toggle-auth">
+        {mode === "login" ? (
+          <p>
+            Don't have an account?{" "}
+            <button onClick={() => setMode("signup")}>Sign Up</button>
+          </p>
+        ) : (
+          <p>
+            Already have an account?{" "}
+            <button onClick={() => setMode("login")}>Log In</button>
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default AuthPage;

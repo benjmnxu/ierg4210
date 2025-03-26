@@ -2,112 +2,168 @@ import { useState, useEffect } from "react";
 import "./style.css";
 
 function Navbar() {
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [categories, setCategories] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    
-    useEffect(() => {
-      const fetchCategories = async () => {
-        try {
-          const response = await fetch("http://localhost:3000/api/categories");
-          if (!response.ok) {
-            throw new Error("Failed to fetch products");
-          }
-          const data = await response.json();
-          setCategories(data);
-        } catch (err) {
-          setError(err.message);
-        } finally {
-            setLoading(false)
-        }
-      };
-      fetchCategories();
-    }, []);
+  const [originDropdownOpen, setOriginDropdownOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [categories, setCategories] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [user, setUser] = useState(null);
 
-    useEffect(() => {
-        const dropdownButton = document.getElementById("dropdown-button");
-        const dropdownMenu = document.getElementById("dropdown-menu");
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/categories");
+        if (!response.ok) throw new Error("Failed to fetch categories");
+        const data = await response.json();
+        setCategories(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
 
-        const toggleDropdown = () => {
-            setDropdownOpen((prev) => !prev);
-        };
+  // Fetch user info
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/api/verified/me", {
+          credentials: "include",
+        });
+        if (!res.ok) throw new Error("Not authenticated");
+        const data = await res.json();
+        setUser(data);
+      } catch (err) {
+        setUser(null);
+      }
+    };
+    fetchUser();
+  }, []);
 
-        const closeDropdown = (event) => {
-            if (
-                dropdownMenu &&
-                !dropdownMenu.contains(event.target) &&
-                dropdownButton &&
-                !dropdownButton.contains(event.target)
-            ) {
-                setDropdownOpen(false);
-            }
-        };
+  // Logout function
+  const handleLogout = async () => {
+    await fetch("http://localhost:3000/api/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+    setUser(null);
+    window.location.href = "/";
+  };
 
-        if (dropdownButton) {
-            dropdownButton.addEventListener("click", toggleDropdown);
-        }
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const originDropdown = document.getElementById("origin-dropdown");
+      const originButton = document.getElementById("origin-button");
+      const userDropdown = document.getElementById("user-dropdown");
+      const userButton = document.getElementById("user-button");
 
-        document.addEventListener("click", closeDropdown);
+      if (
+        originDropdown &&
+        !originDropdown.contains(event.target) &&
+        originButton &&
+        !originButton.contains(event.target)
+      ) {
+        setOriginDropdownOpen(false);
+      }
 
-        return () => {
-            if (dropdownButton) {
-                dropdownButton.removeEventListener("click", toggleDropdown);
-            }
-            document.removeEventListener("click", closeDropdown);
-        };
-    }, []);
+      if (
+        userDropdown &&
+        !userDropdown.contains(event.target) &&
+        userButton &&
+        !userButton.contains(event.target)
+      ) {
+        setUserDropdownOpen(false);
+      }
+    };
 
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
-    // if (loading) {
-    //     return <div>Loading...</div>;
-    // }
-    if (error) return <div>Error: {error}</div>;
-    return (
-        <nav className="navbar">
-            <div className="flex-container">
-                <a href="/" className="button-link">
-                    Home/All Products
+  if (error) return <div>Error: {error}</div>;
+
+  return (
+    <nav className="navbar">
+      <div className="flex-container">
+        <a href="/" className="button-link">
+          Home/All Products
+        </a>
+
+        <div className="dropdown">
+          <button
+            className="dropdown-button"
+            id="origin-button"
+            onClick={() => setOriginDropdownOpen((prev) => !prev)}
+          >
+            Origins ▼
+          </button>
+          <div
+            className={`dropdown-menu ${originDropdownOpen ? "open" : ""}`}
+            id="origin-dropdown"
+          >
+            {!loading &&
+              categories?.map((category) => (
+                <a key={category.catid} href={`/origin/${category.catid}`}>
+                  {category.name}
                 </a>
-                <div className="dropdown">
-                    <button className="dropdown-button" id="dropdown-button">
-                        Origins ▼
+              ))}
+          </div>
+        </div>
+
+        <form className="search-form">
+          <div className="input-group">
+            <input
+              type="text"
+              placeholder="Search..."
+              className="search-input"
+              id="searchQuery"
+            />
+            <button type="submit" className="search-button">
+              Search
+            </button>
+          </div>
+        </form>
+
+        <a href="/cart" className="button-link">
+          Your Cart/Checkout
+        </a>
+        <a href="/admin" className="button-link">
+          Admin Panel
+        </a>
+
+        {user ? (
+            <div className="dropdown">
+                <button
+                    className="dropdown-button"
+                    id="user-button"
+                    onClick={() => setUserDropdownOpen((prev) => !prev)}
+                >
+                    Welcome, {user.name} ▼
+                </button>
+                <div
+                    className={`dropdown-menu ${userDropdownOpen ? "open" : ""}`}
+                    id="user-dropdown"
+                >
+                    <button onClick={handleLogout} className="dropdown-item">
+                        Logout
                     </button>
-                    <div
-                        className={`dropdown-menu ${dropdownOpen ? "open" : ""}`}
-                        id="dropdown-menu"
-                    >
-                        {!loading && categories.map((category) => (
-                        <a key={category.catid} href={`/origin/${category.catid}`}>
-                            {category.name}
-                        </a>
-                    ))} 
-                    </div>
+                    <a href = "/change-password">
+                        Change Password
+                    </a>
                 </div>
-
-                <form className="search-form">
-                    <div className="input-group">
-                        <input
-                            type="text"
-                            placeholder="Search..."
-                            className="search-input"
-                            id="searchQuery"
-                        />
-                        <button type="submit" className="search-button">
-                            Search
-                        </button>
-                    </div>
-                </form>
-
-                <a href="/cart" className="button-link">
-                    Your Cart/Checkout
-                </a>
-                <a href="/admin" className="button-link">
-                    Admin Panel
-                </a>
             </div>
-        </nav>
-    );
+        ) : (
+          <a href="/login" className="button-link">
+            Login
+          </a>
+        )}
+      </div>
+    </nav>
+  );
 }
 
 export default Navbar;

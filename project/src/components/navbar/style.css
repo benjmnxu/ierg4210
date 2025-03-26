@@ -174,3 +174,33 @@ body {
 .dropdown-menu a:hover {
   background-color: #f0f0f0;
 }
+
+.logout-button {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0 8px;
+}
+
+.dropdown-item {
+  background: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  margin: 0;
+  border-radius: 0;
+  font: inherit;
+  color: #000000;
+  text-align: center;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  text-decoration: none;
+}
+
+.dropdown-item:hover {
+  background-color: #f0f0f0;
+  text-decoration: underline;
+}

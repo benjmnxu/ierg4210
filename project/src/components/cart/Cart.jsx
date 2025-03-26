@@ -13,8 +13,7 @@ const CartScreen = () => {
   }, []);
 
   useEffect(() => {
-    if (cart.length === 0 || cartFetched) return; // Prevents unnecessary API calls
-
+    if (cart.length === 0 || cartFetched) return;
     const fetchProductDetails = async () => {
       setLoading(true);
       try {
@@ -68,6 +67,7 @@ const CartScreen = () => {
     return <h2>Your cart is empty.</h2>;
   }
 
+  console.log(cart)
   return (
     <div className="cart-screen">
       <h1>Shopping Cart</h1>

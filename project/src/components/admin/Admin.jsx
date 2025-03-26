@@ -54,9 +54,10 @@ const AdminPanel = () => {
       const formData = new FormData();
       formData.append("image", insertForm.image);
 
-      const uploadResponse = await fetch("http://localhost:3000/api/upload", {
+      const uploadResponse = await fetch("http://localhost:3000/api/admin/upload", {
         method: "POST",
         body: formData,
+        credentials: "include",
       });
 
       const { imageKey, thumbnailKey } = await uploadResponse.json();
@@ -70,10 +71,11 @@ const AdminPanel = () => {
         thumbnailKey,
       };
 
-      await fetch("http://localhost:3000/api/products", {
+      await fetch("http://localhost:3000/api/admin/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(productData),
+        credentials: "include",
       });
 
       alert("Product added successfully!");
@@ -89,10 +91,11 @@ const AdminPanel = () => {
     try {
       const categoryData = { name: categoryInsert.name };
 
-      await fetch("http://localhost:3000/api/categories", {
+      await fetch("http://localhost:3000/api/admin/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(categoryData),
+        credentials: "include",
       });
 
       alert("Category added successfully!");
@@ -113,9 +116,10 @@ const AdminPanel = () => {
         const formData = new FormData();
         formData.append("image", insertForm.image);
   
-        const uploadResponse = await fetch("http://localhost:3000/api/upload", {
+        const uploadResponse = await fetch("http://localhost:3000/api/admin/upload", {
           method: "POST",
           body: formData,
+          credentials: "include",
         });
   
         if (!uploadResponse.ok) {
@@ -138,10 +142,11 @@ const AdminPanel = () => {
       }
   
       // 🔹 Send only the modified fields
-      const response = await fetch(`http://localhost:3000/api/products/${editingId}`, {
+      const response = await fetch(`http://localhost:3000/api/admin/products/${editingId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updates),
+        credentials: "include",
       });
   
       if (!response.ok) {
@@ -164,10 +169,11 @@ const AdminPanel = () => {
     try {
       const updatedCategoryData = { name: categoryInsert.name };
 
-      await fetch(`http://localhost:3000/api/categories/${editingId}`, {
+      await fetch(`http://localhost:3000/api/admin/categories/${editingId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedCategoryData),
+        credentials: "include",
       });
 
       alert("Category updated successfully!");
@@ -182,16 +188,40 @@ const AdminPanel = () => {
     e.preventDefault();
     try {
       if (mode === "products" && deleteId) {
-        await fetch(`http://localhost:3000/api/products/${deleteId}`, {
+        const response = await fetch(`http://localhost:3000/api/admin/products/${deleteId}`, {
           method: "DELETE",
+          credentials: "include",
         });
-        alert("Product deleted successfully!");
+        
+        if (response.ok) {
+          alert("Product deleted successfully!");
+        } else {
+          let message = "Unable to delete product.";
+          alert(message);}
+
         fetchProducts();
       } else if (mode === "categories" && categoryDeleteId) {
-        await fetch(`http://localhost:3000/api/categories/${categoryDeleteId}`, {
+        const response = await fetch(`http://localhost:3000/api/admin/categories/${categoryDeleteId}`, {
           method: "DELETE",
+          credentials: "include",
         });
-        alert("Category deleted successfully!");
+
+        if (response.ok) {
+          alert("Category deleted successfully!");
+        } else {
+          let message = "Unable to delete category.";
+          try {
+            const { error } = await response.json();
+            if (error?.includes("foreign key constraint fails")) {
+              message += "\nThis category is assigned to existing products. Please update or remove those products first.";
+            } else {
+              message += `\n${error || "An unexpected error occurred."}`;
+            }
+          } catch {
+            message += `\nServer responded with status ${response.status}.`;
+          }
+          alert(message);
+        }
         fetchCategories();
       }
       resetForms();
