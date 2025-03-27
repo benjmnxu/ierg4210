@@ -1,16 +1,18 @@
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./style.css";
 
 const Product = () => {
   const { id } = useParams();
-  const productId = parseInt(id, 10);
-  console.log(productId)
 
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  if (!/^\d+$/.test(id)) {
+    return <Navigate to="/not-found" />;
+  }
+  const productId = parseInt(id, 10);
 
   // Fetch product from backend
   useEffect(() => {
@@ -36,7 +38,11 @@ const Product = () => {
   // Handle quantity input change
   const handleQuantityChange = (event) => {
     const value = parseInt(event.target.value, 10);
-    setQuantity(isNaN(value) || value < 0 ? 0 : value);
+    if (isNaN(value) || value < 1 || value > 10000) {
+      setQuantity(1);
+    } else {
+      setQuantity(value);
+    }
   };
 
   // Handle add to cart
@@ -87,7 +93,10 @@ const Product = () => {
             placeholder="Enter quantity"
             value={quantity}
             onChange={handleQuantityChange}
+            min="1"
             max="10000"
+            step="1"
+            required
           />
 
           <button className="add-to-cart" onClick={handleAddToCart}>

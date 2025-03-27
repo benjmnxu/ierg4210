@@ -30,6 +30,7 @@ function App() {
         <Route path="/login" element={<AuthPage />} />
         <Route path="/change-password" element={<ChangePasswordPage />} />
         <Route path="/unauthorized" element={<div>You do not have access to this page.</div>} />
+        <Route path="/not-found" element={<div>This page does not exist.</div>} />
       </Routes>
     </div>
   );
