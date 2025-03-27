@@ -9,7 +9,7 @@ export const secureFetch = async (url, options = {}) => {
     headers: {
       ...options.headers,
       "Content-Type": "application/json",
-      "CSRF-Token": csrf,
+      "X-CSRF-Token": csrf,
     },
   });
 };

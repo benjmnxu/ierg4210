@@ -16,6 +16,8 @@ const app = express();
 const allowedOrigins = ["http://localhost:5173", "http://13.213.143.57", "https://s36.ierg4210.ie.cuhk.edu.hk"];
 const csrfProtection = csrf({ cookie: false });
 
+app.set('trust proxy', 1);
+
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
@@ -26,7 +28,7 @@ app.use(session({
   cookie: {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "Strict",
     maxAge: 1000 * 60 * 60 * 48
   }
 }));

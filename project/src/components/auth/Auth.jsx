@@ -48,7 +48,7 @@ function AuthPage() {
     <div className="login-container">
       <h2 className="login-title">{mode === "login" ? "Login" : "Sign Up"}</h2>
 
-      {errorMsg && <p className="login-error">Email and Password do not match!</p>}
+      {errorMsg && <p className="login-error">{errorMsg}</p>}
       {successMsg && <p className="login-success">{successMsg}</p>}
 
       <form className="login-form" onSubmit={handleSubmit}>
