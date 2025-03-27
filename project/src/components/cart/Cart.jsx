@@ -19,7 +19,7 @@ const CartScreen = () => {
       try {
         const updatedCart = await Promise.all(
           cart.map(async (item) => {
-            const response = await fetch(`http://localhost:3000/api/products/${item.pid}`);
+            const response = await fetch(`/api/products/${item.pid}`);
             const productData = await response.json();
 
             // Ensure we extract the first item in the list

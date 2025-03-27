@@ -7,7 +7,7 @@ export default function ProtectedRoute({ children, adminOnly = false }) {
   const [status, setStatus] = useState("unauthorized"); // 'unauthorized' | 'authorized' | 'not-admin'
 
   useEffect(() => {
-    secureFetch("http://localhost:3000/api/verified/me")
+    secureFetch("/api/verified/me")
       .then((res) => {
         if (!res.ok) throw new Error("Unauthorized");
         return res.json();

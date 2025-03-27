@@ -13,7 +13,7 @@ const { verifyAuth, requireAdmin } = require("./utils/auth");
 require("dotenv").config();
 
 const app = express();
-const allowedOrigins = ["http://localhost:5173", "http://13.213.143.57"];
+const allowedOrigins = ["http://localhost:5173", "http://13.213.143.57", "https://s36.ierg4210.ie.cuhk.edu.hk"];
 const csrfProtection = csrf({ cookie: false });
 
 app.use(cors({ origin: allowedOrigins, credentials: true }));

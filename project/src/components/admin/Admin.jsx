@@ -27,14 +27,14 @@ const AdminPanel = () => {
   }, [mode]);
 
   const fetchCategories = () => {
-    fetch("http://localhost:3000/api/categories")
+    fetch("/api/categories")
       .then((res) => res.json())
       .then(setCategories)
       .catch(console.error);
   };
 
   const fetchProducts = () => {
-    fetch("http://localhost:3000/api/products")
+    fetch("/api/products")
       .then((res) => res.json())
       .then(setProducts)
       .catch(console.error);
@@ -71,7 +71,7 @@ const AdminPanel = () => {
       const formData = new FormData();
       formData.append("image", insertForm.image);
 
-      const uploadResponse = await secureFetch("http://localhost:3000/api/admin/upload", {
+      const uploadResponse = await secureFetch("/api/admin/upload", {
         method: "POST",
         body: formData,
       });
@@ -87,7 +87,7 @@ const AdminPanel = () => {
         thumbnailKey,
       };
 
-      await secureFetch("http://localhost:3000/api/admin/products", {
+      await secureFetch("/api/admin/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(productData),
@@ -106,7 +106,7 @@ const AdminPanel = () => {
     try {
       const categoryData = { name: sanitizeInput(categoryInsert.name) };
 
-      await secureFetch("http://localhost:3000/api/admin/categories", {
+      await secureFetch("/api/admin/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(categoryData),
@@ -129,7 +129,7 @@ const AdminPanel = () => {
         const formData = new FormData();
         formData.append("image", insertForm.image);
   
-        const uploadResponse = await secureFetch("http://localhost:3000/api/admin/upload", {
+        const uploadResponse = await secureFetch("/api/admin/upload", {
           method: "POST",
           body: formData,
         });
@@ -156,7 +156,7 @@ const AdminPanel = () => {
       }
   
       // 🔹 Send only the modified fields
-      const response = await secureFetch(`http://localhost:3000/api/admin/products/${editingId}`, {
+      const response = await secureFetch(`/api/admin/products/${editingId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updates),
@@ -182,7 +182,7 @@ const AdminPanel = () => {
     try {
       const updatedCategoryData = { name: sanitizeInput(categoryInsert.name) };
 
-      await secureFetch(`http://localhost:3000/api/admin/categories/${editingId}`, {
+      await secureFetch(`/api/admin/categories/${editingId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedCategoryData),
@@ -200,7 +200,7 @@ const AdminPanel = () => {
     e.preventDefault();
     try {
       if (mode === "products" && deleteId) {
-        const response = await secureFetch(`http://localhost:3000/api/admin/products/${deleteId}`, {
+        const response = await secureFetch(`/api/admin/products/${deleteId}`, {
           method: "DELETE",
         });
         
@@ -212,7 +212,7 @@ const AdminPanel = () => {
 
         fetchProducts();
       } else if (mode === "categories" && categoryDeleteId) {
-        const response = await secureFetch(`http://localhost:3000/api/admin/categories/${categoryDeleteId}`, {
+        const response = await secureFetch(`/api/admin/categories/${categoryDeleteId}`, {
           method: "DELETE",
         });
 
@@ -325,7 +325,7 @@ const AdminPanel = () => {
               </select>
               <input type="number" name="price" value={insertForm.price} onChange={(e) => handleChange(e, setInsertForm)} placeholder="Price" max="10000000"/>
               <textarea name="description" value={insertForm.description} onChange={(e) => handleChange(e, setInsertForm)} placeholder="Description" maxLength={1000}/>
-              <input type="file" name="image" accept=".jpg,.jpeg,.png,image/jpeg,image/png" onChange={handleFileChange} only jpg, jpeg, png, />
+              <input type="file" name="image" accept=".jpg,.jpeg,.png,image/jpeg,image/png" onChange={handleFileChange} />
               </>
             ) : (
               <>

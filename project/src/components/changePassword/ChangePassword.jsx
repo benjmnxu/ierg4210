@@ -22,7 +22,7 @@ function ChangePasswordPage() {
     }
 
     try {
-      const response = await secureFetch("http://localhost:3000/api/verified/change-password", {
+      const response = await secureFetch("/api/verified/change-password", {
         method: 'POST',
         body: JSON.stringify({
             currentPassword: currentPassword,

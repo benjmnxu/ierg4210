@@ -14,7 +14,7 @@ function Navbar() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/categories");
+        const response = await fetch("/api/categories");
         if (!response.ok) throw new Error("Failed to fetch categories");
         const data = await response.json();
         setCategories(data);
@@ -31,7 +31,7 @@ function Navbar() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await secureFetch("http://localhost:3000/api/verified/me");
+        const res = await secureFetch("/api/verified/me");
         if (!res.ok) throw new Error("Not authenticated");
         const data = await res.json();
         setUser(data);
@@ -44,7 +44,7 @@ function Navbar() {
 
   // Logout function
   const handleLogout = async () => {
-    await secureFetch("http://localhost:3000/api/logout", {
+    await secureFetch("/api/logout", {
       method: "POST",
     });
     setUser(null);

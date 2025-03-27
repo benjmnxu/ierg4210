@@ -1,5 +1,5 @@
 export const getCsrfToken = async () => {
-    const res = await fetch("http://localhost:3000/api/csrf-token", {
+    const res = await fetch("/api/csrf-token", {
       credentials: "include",
     });
     const data = await res.json();
