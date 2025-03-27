@@ -40,7 +40,7 @@ function ChangePasswordPage() {
       setNewPassword('');
       setConfirmPassword('');
 
-      navigate("/");
+      window.location.href = "/";
     } catch (err) {
       setErrorMsg(err.message);
     }
