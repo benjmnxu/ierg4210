@@ -9,14 +9,14 @@ const router = express.Router();
 
 router.get("/categories", (req, res) => {
   db.query("SELECT * FROM categories", (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+    if (err) return res.status(500).json({ error: "500 Server Error" });
     res.json(results);
   });
 });
 
 router.get("/products", (req, res) => {
   db.query("SELECT * FROM products", (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+    if (err) return res.status(500).json({ error: "500 Server Error" });
 
     const signedProducts = results.map((product) => {
       if (!product.image_key) return product;
@@ -39,12 +39,12 @@ router.get("/products/:pid",
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: "400 Malformed Input" });
     }
     
     const { pid } = req.params;
     db.query("SELECT * FROM products WHERE pid = ?", [pid], (err, results) => {
-      if (err) return res.status(500).json({ error: err.message });
+      if (err) return res.status(500).json({ error: "500 Server Error" });
 
       const signedProducts = results.map((product) => {
         if (!product.image_key) return product;

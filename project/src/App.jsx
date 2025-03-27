@@ -9,6 +9,8 @@ import AdminPanel from "./components/admin/Admin"
 import AuthPage from "./components/auth/Auth"
 import ChangePasswordPage from "./components/changePassword/ChangePassword"
 import ProtectedRoute from "./components/ProtectedRoute";
+import UnauthorizedPage from "./components/staticPages/Unauthorized";
+import NotFound from "./components/staticPages/NotFound";
 
 function App() {
   return (
@@ -29,8 +31,8 @@ function App() {
         />
         <Route path="/login" element={<AuthPage />} />
         <Route path="/change-password" element={<ChangePasswordPage />} />
-        <Route path="/unauthorized" element={<div>You do not have access to this page.</div>} />
-        <Route path="/not-found" element={<div>This page does not exist.</div>} />
+        <Route path="/unauthorized" element={<UnauthorizedPage/>} />
+        <Route path="*" element={<NotFound/>} />
       </Routes>
     </div>
   );

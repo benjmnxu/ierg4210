@@ -65,14 +65,14 @@ router.post("/products", [
   body("thumbnailKey").notEmpty(),
 ], (req, res) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+  if (!errors.isEmpty()) return res.status(400).json({ error: "400 Malformed Input"});
 
   const { name, price, description, catid, imageKey, thumbnailKey } = req.body;
   db.query(
     "INSERT INTO products (catid, name, price, description, image_key, thumbnail_key) VALUES (?, ?, ?, ?, ?, ?)",
     [catid, name, price, description, imageKey, thumbnailKey],
     (err) => {
-      if (err) return res.status(500).json({ error: err.message });
+      if (err) return res.status(500).json({ error: "500 Server Error"});
       res.json({ message: "Product added" });
     }
   );
@@ -90,7 +90,7 @@ router.put("/products/:id", [
   body("thumbnail_key").optional().notEmpty(),
 ], (req, res) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+  if (!errors.isEmpty()) return res.status(400).json({ error: "400 Malformed Input" });
 
   const { id } = req.params;
   const updates = req.body;
@@ -106,8 +106,8 @@ router.put("/products/:id", [
   const sql = `UPDATE products SET ${fieldsToUpdate} WHERE pid = ?`;
 
   db.query(sql, values, (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (result.affectedRows === 0) return res.status(404).json({ error: "Not found" });
+    if (err) return res.status(500).json({ error: "500 Server Error" });
+    if (result.affectedRows === 0) return res.status(404).json({ error: "404 Not found" });
     res.json({ message: "Updated" });
   });
 });
@@ -117,12 +117,12 @@ router.delete("/products/:id", [
   param("id").isInt(),
 ], (req, res) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+  if (!errors.isEmpty()) return res.status(400).json({ errors: "400 Malformed Input" });
 
   const { id } = req.params;
   db.query("DELETE FROM products WHERE pid = ?", [id], (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (result.affectedRows === 0) return res.status(404).json({ error: "Not found" });
+    if (err) return res.status(500).json({ error: "500 Server Error" });
+    if (result.affectedRows === 0) return res.status(404).json({ error: "404 Not found" });
     res.json({ message: "Deleted" });
   });
 });
@@ -132,11 +132,11 @@ router.post("/categories", [
   body("name").trim().escape().isLength({ min: 1, max: 100 }),
 ], (req, res) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+  if (!errors.isEmpty()) return res.status(400).json({ error: "400 Malformed Input" });
 
   const { name } = req.body;
   db.query("INSERT INTO categories (name) VALUES (?)", [name], (err) => {
-    if (err) return res.status(500).json({ error: err.message });
+    if (err) return res.status(500).json({ error: "500 Server Error"});
     res.json({ message: "Category added" });
   });
 });
@@ -147,7 +147,7 @@ router.put("/categories/:id", [
   body("name").optional().trim().escape().isLength({ min: 1, max: 100 }),
 ], (req, res) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+  if (!errors.isEmpty()) return res.status(400).json({ error: "400 Malformed Input" });
 
   const { id } = req.params;
   const updates = req.body;
@@ -163,8 +163,8 @@ router.put("/categories/:id", [
   const sql = `UPDATE categories SET ${fieldsToUpdate} WHERE catid = ?`;
 
   db.query(sql, values, (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (result.affectedRows === 0) return res.status(404).json({ error: "Not found" });
+    if (err) return res.status(500).json({ error: "500 Server Error" });
+    if (result.affectedRows === 0) return res.status(404).json({ error: "404 Not found" });
     res.json({ message: "Updated" });
   });
 });
@@ -174,12 +174,12 @@ router.delete("/categories/:id", [
   param("id").isInt(),
 ], (req, res) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+  if (!errors.isEmpty()) return res.status(400).json({ error: "400 Malformed Input" });
 
   const { id } = req.params;
   db.query("DELETE FROM categories WHERE catid = ?", [id], (err, result) => {
     if (err) return res.status(500).json({ error: err.message });
-    if (result.affectedRows === 0) return res.status(404).json({ error: "Not found" });
+    if (result.affectedRows === 0) return res.status(404).json({ error: "404 Not found" });
     res.json({ message: "Deleted" });
   });
 });

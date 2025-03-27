@@ -3,48 +3,46 @@ import "./Cart.css";
 
 const CartScreen = () => {
   const [cart, setCart] = useState([]);
+  const [rawCart, setRawCart] = useState([]);
   const [loading, setLoading] = useState(false);
   // const [totalPrice, setTotalPrice] = useState(0);
   const [cartFetched, setCartFetched] = useState(false); // Prevents infinite API calls
 
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
-    setCart(storedCart);
+    setRawCart(storedCart);
   }, []);
-
+  
   useEffect(() => {
-    if (cart.length === 0 || cartFetched) return;
+    if (rawCart.length === 0 || cartFetched) return;
+  
     const fetchProductDetails = async () => {
       setLoading(true);
       try {
         const updatedCart = await Promise.all(
-          cart.map(async (item) => {
+          rawCart.map(async (item) => {
             const response = await fetch(`/api/products/${item.pid}`);
             const productData = await response.json();
-
-            // Ensure we extract the first item in the list
             const product = productData[0] || {};
-
             return {
               ...item,
               name: product.name || "Unknown Product",
-              price: parseFloat(product.price) || 0,
+              price: Number(product.price) || 0,
             };
           })
         );
-
         setCart(updatedCart);
-        // setTotalPrice(updatedCart.reduce((sum, item) => sum + item.price * item.quantity, 0));
-        setCartFetched(true); // Mark as fetched to avoid infinite loops
+        setCartFetched(true);
       } catch (error) {
         console.error("Error fetching product details:", error);
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchProductDetails();
-  }, [cart, cartFetched]);
+  }, [rawCart, cartFetched]);
+  
 
   const handleQuantityChange = (pid, newQuantity) => {
     if (newQuantity < 0) return; // Prevents negative values
@@ -67,7 +65,7 @@ const CartScreen = () => {
     return <h2>Your cart is empty.</h2>;
   }
 
-  console.log(cart)
+  console.log("C", cart)
   return (
     <div className="cart-screen">
       <h1>Shopping Cart</h1>

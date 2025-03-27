@@ -1,0 +1,16 @@
+.static-container {
+  max-width: 400px;
+  margin: 60px auto;
+  padding: 30px;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  color: #333;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.static-title {
+  text-align: center;
+  color: #222;
+  margin: 0 0 20px 0;
+}

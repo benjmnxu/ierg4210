@@ -112,18 +112,24 @@ function Navbar() {
           </div>
         </div>
 
-        <form className="search-form">
-          <div className="input-group">
-            <input
-              type="text"
-              placeholder="Search..."
-              className="search-input"
-              id="searchQuery"
-            />
-            <button type="submit" className="search-button">
-              Search
-            </button>
-          </div>
+        <form
+            className="search-form"
+            onSubmit={(e) => {
+                e.preventDefault();
+                console.log("Search submitted (in the future)");
+              }}
+            >
+            <div className="input-group">
+                <input
+                type="text"
+                placeholder="Search..."
+                className="search-input"
+                id="searchQuery"
+                />
+                <button type="submit" className="search-button">
+                Search
+                </button>
+            </div>
         </form>
 
         <a href="/cart" className="button-link">
