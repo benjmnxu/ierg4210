@@ -23,7 +23,7 @@ function AuthPage() {
         : { email, password };
 
     try {
-      const response = await secureFetch(`http://localhost:3000/api/${endpoint}`, {
+      const response = await secureFetch(`/api/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -38,7 +38,7 @@ function AuthPage() {
         setSuccessMsg("Signup successful! You're now logged in.");
       }
 
-      window.location.href = "/admin"; // or "/"
+      window.location.href = "/";
     } catch (err) {
       setErrorMsg(err.message);
     }
@@ -48,7 +48,7 @@ function AuthPage() {
     <div className="login-container">
       <h2 className="login-title">{mode === "login" ? "Login" : "Sign Up"}</h2>
 
-      {errorMsg && <p className="login-error">{errorMsg}</p>}
+      {errorMsg && <p className="login-error">Email and Password do not match!</p>}
       {successMsg && <p className="login-success">{successMsg}</p>}
 
       <form className="login-form" onSubmit={handleSubmit}>
