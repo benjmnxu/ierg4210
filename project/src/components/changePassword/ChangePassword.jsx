@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import "./style.css";
+import { secureFetch } from '../../utils/secureFetch';
 
 function ChangePasswordPage() {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -7,6 +9,7 @@ function ChangePasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,10 +22,8 @@ function ChangePasswordPage() {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/verified/change-password", {
+      const response = await secureFetch("http://localhost:3000/api/verified/change-password", {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({
             currentPassword: currentPassword,
             newPassword: newPassword
@@ -38,6 +39,8 @@ function ChangePasswordPage() {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
+
+      navigate("/");
     } catch (err) {
       setErrorMsg(err.message);
     }
@@ -57,6 +60,8 @@ function ChangePasswordPage() {
           id="currentPassword"
           value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
+          minLength={6}
+          maxLength={100}
           required
         />
 
@@ -66,6 +71,8 @@ function ChangePasswordPage() {
           id="newPassword"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
+          minLength={6}
+          maxLength={100}
           required
         />
 
@@ -75,6 +82,8 @@ function ChangePasswordPage() {
           id="confirmPassword"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
+          minLength={6}
+          maxLength={100}
           required
         />
 

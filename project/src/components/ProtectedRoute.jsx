@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
+import { secureFetch } from "../utils/secureFetch";
 
 export default function ProtectedRoute({ children, adminOnly = false }) {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("unauthorized"); // 'unauthorized' | 'authorized' | 'not-admin'
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/verified/me", { credentials: "include" })
+    secureFetch("http://localhost:3000/api/verified/me")
       .then((res) => {
         if (!res.ok) throw new Error("Unauthorized");
         return res.json();

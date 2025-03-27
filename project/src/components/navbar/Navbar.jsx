@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "./style.css";
+import { secureFetch } from "../../utils/secureFetch";
 
 function Navbar() {
   const [originDropdownOpen, setOriginDropdownOpen] = useState(false);
@@ -30,9 +31,7 @@ function Navbar() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/verified/me", {
-          credentials: "include",
-        });
+        const res = await secureFetch("http://localhost:3000/api/verified/me");
         if (!res.ok) throw new Error("Not authenticated");
         const data = await res.json();
         setUser(data);
@@ -45,9 +44,8 @@ function Navbar() {
 
   // Logout function
   const handleLogout = async () => {
-    await fetch("http://localhost:3000/api/logout", {
+    await secureFetch("http://localhost:3000/api/logout", {
       method: "POST",
-      credentials: "include",
     });
     setUser(null);
     window.location.href = "/";

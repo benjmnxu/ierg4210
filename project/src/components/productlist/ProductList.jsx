@@ -113,6 +113,7 @@ const ProductList = () => {
               type="number"
               min="1"
               defaultValue="1"
+              max="10000"
               className="quantity-input"
               id={`quantity-${product.pid}`}
             />

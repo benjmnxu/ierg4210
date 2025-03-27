@@ -1,4 +1,5 @@
 const express = require("express");
+const { param, validationResult } = require("express-validator");
 const db = require("../utils/db");
 const s3 = require("../utils/s3")
 
@@ -33,19 +34,26 @@ router.get("/products", (req, res) => {
   });
 });
 
-router.get("/products/:pid", (req, res) => {
-  const { pid } = req.params;
-  db.query("SELECT * FROM products WHERE pid = ?", [pid], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+router.get("/products/:pid", 
+  [param("pid").isInt().withMessage("Product ID must be an integer")],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    
+    const { pid } = req.params;
+    db.query("SELECT * FROM products WHERE pid = ?", [pid], (err, results) => {
+      if (err) return res.status(500).json({ error: err.message });
 
-    const signedProducts = results.map((product) => {
-      if (!product.image_key) return product;
+      const signedProducts = results.map((product) => {
+        if (!product.image_key) return product;
 
-      const image_signedUrl = s3.getSignedUrl("getObject", {
-        Bucket: process.env.AWS_S3_BUCKET,
-        Key: product.image_key,
-        Expires: 60 * 5,
-      });
+        const image_signedUrl = s3.getSignedUrl("getObject", {
+          Bucket: process.env.AWS_S3_BUCKET,
+          Key: product.image_key,
+          Expires: 60 * 5,
+        });
 
       return { ...product, image: image_signedUrl };
     });

@@ -83,6 +83,7 @@ const CartScreen = () => {
                 <input
                   type="number"
                   min="0"
+                  max="10000"
                   value={item.quantity}
                   onChange={(e) => handleQuantityChange(item.pid, parseInt(e.target.value, 10) || 0)}
                 />

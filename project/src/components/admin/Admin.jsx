@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./admin.css";
+import { secureFetch } from "../../utils/secureFetch";
 
 const AdminPanel = () => {
   const [mode, setMode] = useState("products");
@@ -13,6 +14,12 @@ const AdminPanel = () => {
 
   const [deleteId, setDeleteId] = useState("");
   const [categoryDeleteId, setCategoryDeleteId] = useState("");
+
+  const sanitizeInput = (str) => {
+    const div = document.createElement("div");
+    div.innerText = str;
+    return div.innerHTML;
+  };
 
   useEffect(() => {
     fetchCategories();
@@ -39,8 +46,18 @@ const AdminPanel = () => {
   };
 
   const handleFileChange = (e) => {
-    setInsertForm((prev) => ({ ...prev, image: e.target.files[0] }));
+    const file = e.target.files[0];
+    const maxSize = 10 * 1024 * 1024;
+  
+    if (file && file.size > maxSize) {
+      alert("File too large. Max size is 10MB.");
+      e.target.value = "";
+      return;
+    }
+  
+    setInsertForm((prev) => ({ ...prev, image: file }));
   };
+  
 
   const handleProductSubmit = async (e) => {
     e.preventDefault();
@@ -54,28 +71,26 @@ const AdminPanel = () => {
       const formData = new FormData();
       formData.append("image", insertForm.image);
 
-      const uploadResponse = await fetch("http://localhost:3000/api/admin/upload", {
+      const uploadResponse = await secureFetch("http://localhost:3000/api/admin/upload", {
         method: "POST",
         body: formData,
-        credentials: "include",
       });
 
       const { imageKey, thumbnailKey } = await uploadResponse.json();
 
       const productData = {
-        name: insertForm.name,
-        price: insertForm.price,
-        description: insertForm.description,
+        name: sanitizeInput(insertForm.name),
+        price: parseFloat(insertForm.price),
+        description: sanitizeInput(insertForm.description),
         catid: insertForm.catid,
         imageKey,
         thumbnailKey,
       };
 
-      await fetch("http://localhost:3000/api/admin/products", {
+      await secureFetch("http://localhost:3000/api/admin/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(productData),
-        credentials: "include",
       });
 
       alert("Product added successfully!");
@@ -89,13 +104,12 @@ const AdminPanel = () => {
   const handleCategorySubmit = async (e) => {
     e.preventDefault();
     try {
-      const categoryData = { name: categoryInsert.name };
+      const categoryData = { name: sanitizeInput(categoryInsert.name) };
 
-      await fetch("http://localhost:3000/api/admin/categories", {
+      await secureFetch("http://localhost:3000/api/admin/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(categoryData),
-        credentials: "include",
       });
 
       alert("Category added successfully!");
@@ -111,15 +125,13 @@ const AdminPanel = () => {
     try {
       let updates = {};
   
-      // 🔹 Upload image if provided
       if (insertForm.image) {
         const formData = new FormData();
         formData.append("image", insertForm.image);
   
-        const uploadResponse = await fetch("http://localhost:3000/api/admin/upload", {
+        const uploadResponse = await secureFetch("http://localhost:3000/api/admin/upload", {
           method: "POST",
           body: formData,
-          credentials: "include",
         });
   
         if (!uploadResponse.ok) {
@@ -133,7 +145,9 @@ const AdminPanel = () => {
   
       // 🔹 Add only modified fields to `updates`
       ["name", "price", "description", "catid"].forEach((field) => {
-        if (insertForm[field]) updates[field] = insertForm[field];
+        if (insertForm[field]) {
+          updates[field] = field === "price" ? parseFloat(insertForm[field]) : sanitizeInput(insertForm[field]);
+        }
       });
   
       if (Object.keys(updates).length === 0) {
@@ -142,11 +156,10 @@ const AdminPanel = () => {
       }
   
       // 🔹 Send only the modified fields
-      const response = await fetch(`http://localhost:3000/api/admin/products/${editingId}`, {
+      const response = await secureFetch(`http://localhost:3000/api/admin/products/${editingId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updates),
-        credentials: "include",
       });
   
       if (!response.ok) {
@@ -167,13 +180,12 @@ const AdminPanel = () => {
   const handleCategoryUpdateSubmit = async (e) => {
     e.preventDefault();
     try {
-      const updatedCategoryData = { name: categoryInsert.name };
+      const updatedCategoryData = { name: sanitizeInput(categoryInsert.name) };
 
-      await fetch(`http://localhost:3000/api/admin/categories/${editingId}`, {
+      await secureFetch(`http://localhost:3000/api/admin/categories/${editingId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedCategoryData),
-        credentials: "include",
       });
 
       alert("Category updated successfully!");
@@ -188,9 +200,8 @@ const AdminPanel = () => {
     e.preventDefault();
     try {
       if (mode === "products" && deleteId) {
-        const response = await fetch(`http://localhost:3000/api/admin/products/${deleteId}`, {
+        const response = await secureFetch(`http://localhost:3000/api/admin/products/${deleteId}`, {
           method: "DELETE",
-          credentials: "include",
         });
         
         if (response.ok) {
@@ -201,9 +212,8 @@ const AdminPanel = () => {
 
         fetchProducts();
       } else if (mode === "categories" && categoryDeleteId) {
-        const response = await fetch(`http://localhost:3000/api/admin/categories/${categoryDeleteId}`, {
+        const response = await secureFetch(`http://localhost:3000/api/admin/categories/${categoryDeleteId}`, {
           method: "DELETE",
-          credentials: "include",
         });
 
         if (response.ok) {
@@ -270,7 +280,7 @@ const AdminPanel = () => {
             <h3>{mode === "products" ? "Add New Product" : "Add New Category"}</h3>
             {mode === "products" ? (
               <>
-                <input type="text" name="name" value={insertForm.name} onChange={(e) => handleChange(e, setInsertForm)} placeholder="Product Name" required />
+                <input type="text" name="name" value={insertForm.name} onChange={(e) => handleChange(e, setInsertForm)} placeholder="Product Name" minLength = {1} maxLength={100} required/>
                 <select name="catid" value={insertForm.catid} onChange={(e) => handleChange(e, setInsertForm)} required>
                   <option value="">Select Category</option>
                   {categories.map((category) => (
@@ -279,12 +289,12 @@ const AdminPanel = () => {
                     </option>
                   ))}
                 </select>
-                <input type="number" name="price" value={insertForm.price} onChange={(e) => handleChange(e, setInsertForm)} placeholder="Price" required />
-                <textarea name="description" value={insertForm.description} onChange={(e) => handleChange(e, setInsertForm)} placeholder="Description" required />
-                <input type="file" name="image" accept="image/*" onChange={handleFileChange} required />
+                <input type="number" name="price" value={insertForm.price} onChange={(e) => handleChange(e, setInsertForm)} placeholder="Price" min="0" max="10000000" step="0.01" required />
+                <textarea name="description" value={insertForm.description} onChange={(e) => handleChange(e, setInsertForm)} placeholder="Description" minLength = {1} maxLength={1000} required />
+                <input type="file" name="image" accept=".jpg,.jpeg,.png,image/jpeg,image/png" onChange={handleFileChange} required />
               </>
             ) : (
-              <input type="text" name="name" value={categoryInsert.name} onChange={(e) => handleChange(e, setCategoryInsert)} placeholder="Category Name" required />
+              <input type="text" name="name" value={categoryInsert.name} onChange={(e) => handleChange(e, setCategoryInsert)} placeholder="Category Name" minLength = {1} maxLength={100} required />
             )}
             <button type="submit">Add {mode === "products" ? "Product" : "Category"}</button>
           </form>
@@ -304,7 +314,7 @@ const AdminPanel = () => {
                   </option>
                 ))}
               </select>
-              <input type="text" name="name" value={insertForm.name} onChange={(e) => handleChange(e, setInsertForm)} placeholder="Product Name" />
+              <input type="text" name="name" value={insertForm.name} onChange={(e) => handleChange(e, setInsertForm)} placeholder="Product Name" maxLength={100}/>
               <select name="catid" value={insertForm.catid} onChange={(e) => handleChange(e, setInsertForm)} >
                 <option value="">Select Category</option>
                 {categories.map((category) => (
@@ -313,9 +323,9 @@ const AdminPanel = () => {
                   </option>
                 ))}
               </select>
-              <input type="number" name="price" value={insertForm.price} onChange={(e) => handleChange(e, setInsertForm)} placeholder="Price" />
-              <textarea name="description" value={insertForm.description} onChange={(e) => handleChange(e, setInsertForm)} placeholder="Description" />
-              <input type="file" name="image" accept="image/*" onChange={handleFileChange} />
+              <input type="number" name="price" value={insertForm.price} onChange={(e) => handleChange(e, setInsertForm)} placeholder="Price" max="10000000"/>
+              <textarea name="description" value={insertForm.description} onChange={(e) => handleChange(e, setInsertForm)} placeholder="Description" maxLength={1000}/>
+              <input type="file" name="image" accept=".jpg,.jpeg,.png,image/jpeg,image/png" onChange={handleFileChange} only jpg, jpeg, png, />
               </>
             ) : (
               <>
@@ -327,7 +337,7 @@ const AdminPanel = () => {
                     </option>
                   ))}
                 </select>
-                <input type="text" name="name" value={categoryInsert.name} onChange={(e) => handleChange(e, setCategoryInsert)} placeholder="New Category Name" required />
+                <input type="text" name="name" value={categoryInsert.name} onChange={(e) => handleChange(e, setCategoryInsert)} placeholder="New Category Name" minLength={1} maxLength={100} required />
               </>
             )}
             <button type="submit">Update {mode === "products" ? "Product" : "Category"}</button>

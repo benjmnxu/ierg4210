@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import "./style.css";
+import { secureFetch } from '../../utils/secureFetch';
 
 function AuthPage() {
   const [mode, setMode] = useState("login");
@@ -22,11 +23,10 @@ function AuthPage() {
         : { email, password };
 
     try {
-      const response = await fetch(`http://localhost:3000/api/${endpoint}`, {
+      const response = await secureFetch(`http://localhost:3000/api/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        credentials: "include"
       });
 
       if (!response.ok) {
@@ -60,6 +60,8 @@ function AuthPage() {
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              minLength={1}
+              maxLength={100}
               required
             />
           </>
@@ -69,9 +71,10 @@ function AuthPage() {
         <input
           type="email"
           id="email"
-          required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          maxLength={100}
+          required
         />
 
         <label htmlFor="password">Password:</label>
@@ -81,6 +84,8 @@ function AuthPage() {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          maxLength={100}
+          minLength={1}
         />
 
         {mode === "signup" && (
@@ -91,6 +96,7 @@ function AuthPage() {
               id="adminCode"
               value={adminCode}
               onChange={(e) => setAdminCode(e.target.value)}
+              maxLength={100}
             />
           </>
         )}

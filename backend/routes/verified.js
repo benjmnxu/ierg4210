@@ -1,9 +1,11 @@
 const express = require("express");
 const crypto = require("crypto");
+const { body, validationResult } = require("express-validator");
 const db = require("../utils/db");
 
 const router = express.Router();
 
+// GET /me
 router.get("/me", (req, res) => {
   if (!req.session.uid) {
     return res.status(401).json({ error: "Not authenticated" });
@@ -24,51 +26,78 @@ router.get("/me", (req, res) => {
   });
 });
 
-router.post("/change-password", (req, res) => {
-  if (!req.session.uid) {
-    return res.status(401).json({ error: "Not authenticated" });
-  }
+// POST /change-password
+router.post(
+  "/change-password",
+  [
+    body("currentPassword")
+      .isLength({ min: 6 })
+      .withMessage("Current password must be at least 6 characters")
+      .trim(),
 
-  const { currentPassword, newPassword } = req.body;
-  if (!currentPassword || !newPassword) {
-    return res.status(400).json({ error: "Both fields required" });
-  }
-
-  db.query("SELECT * FROM users WHERE uid = ?", [req.session.uid], (err, results) => {
-    if (err || results.length === 0)
-      return res.status(500).json({ error: "User not found" });
-
-    const user = results[0];
-    const currentHash = crypto.createHash("sha256").update(currentPassword + user.salt).digest("hex");
-
-    if (currentHash !== user.hash) {
-      return res.status(401).json({ error: "Current password incorrect" });
+    body("newPassword")
+      .isLength({ min: 6 })
+      .withMessage("New password must be at least 6 characters")
+      .trim(),
+  ],
+  (req, res) => {
+    if (!req.session.uid) {
+      return res.status(401).json({ error: "Not authenticated" });
     }
 
-    const newSalt = crypto.randomBytes(16).toString("hex");
-    const newHash = crypto.createHash("sha256").update(newPassword + newSalt).digest("hex");
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
-    db.query(
-      "UPDATE users SET hash = ?, salt = ? WHERE uid = ?",
-      [newHash, newSalt, req.session.uid],
-      (err) => {
-        if (err) return res.status(500).json({ error: "Failed to update password" });
+    const { currentPassword, newPassword } = req.body;
 
-        req.session.destroy(() => {
-          res.clearCookie("connect.sid", {
-            path: "/",
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-          });
-
-          res.json({ message: "Password updated, please log in again" });
-        });
+    db.query("SELECT * FROM users WHERE uid = ?", [req.session.uid], (err, results) => {
+      if (err || results.length === 0) {
+        return res.status(500).json({ error: "User not found" });
       }
-    );
-  });
-});
 
+      const user = results[0];
+      const currentHash = crypto
+        .createHash("sha256")
+        .update(currentPassword + user.salt)
+        .digest("hex");
+
+      if (currentHash !== user.hash) {
+        return res.status(401).json({ error: "Current password incorrect" });
+      }
+
+      const newSalt = crypto.randomBytes(16).toString("hex");
+      const newHash = crypto
+        .createHash("sha256")
+        .update(newPassword + newSalt)
+        .digest("hex");
+
+      db.query(
+        "UPDATE users SET hash = ?, salt = ? WHERE uid = ?",
+        [newHash, newSalt, req.session.uid],
+        (err) => {
+          if (err) {
+            return res.status(500).json({ error: "Failed to update password" });
+          }
+
+          req.session.destroy(() => {
+            res.clearCookie("connect.sid", {
+              path: "/",
+              httpOnly: true,
+              secure: process.env.NODE_ENV === "production",
+              sameSite: "strict",
+            });
+
+            res.json({ message: "Password updated, please log in again" });
+          });
+        }
+      );
+    });
+  }
+);
+
+// POST /logout
 router.post("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) return res.status(500).json({ error: "Logout failed" });

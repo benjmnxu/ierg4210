@@ -87,6 +87,7 @@ const Product = () => {
             placeholder="Enter quantity"
             value={quantity}
             onChange={handleQuantityChange}
+            max="10000"
           />
 
           <button className="add-to-cart" onClick={handleAddToCart}>
