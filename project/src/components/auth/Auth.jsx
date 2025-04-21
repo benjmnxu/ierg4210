@@ -23,6 +23,7 @@ function AuthPage() {
         : { email, password };
 
     try {
+      
       const response = await secureFetch(`/api/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

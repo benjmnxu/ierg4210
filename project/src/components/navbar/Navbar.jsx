@@ -158,6 +158,9 @@ function Navbar() {
                     <a href = "/change-password">
                         Change Password
                     </a>
+                    <a href = "/recent-orders">
+                        Recent Orders
+                    </a>
                 </div>
             </div>
         ) : (

@@ -8,6 +8,8 @@ import Cart from "./components/cart/Cart"
 import AdminPanel from "./components/admin/Admin"
 import AuthPage from "./components/auth/Auth"
 import ChangePasswordPage from "./components/changePassword/ChangePassword"
+import RecentOrders from "./pages/recentOrders/RecentOrders";
+import CheckoutSuccess from "./pages/checkoutSuccess/CheckoutSuccess";
 import ProtectedRoute from "./components/ProtectedRoute";
 import UnauthorizedPage from "./components/staticPages/Unauthorized";
 import NotFound from "./components/staticPages/NotFound";
@@ -30,7 +32,16 @@ function App() {
           }
         />
         <Route path="/login" element={<AuthPage />} />
-        <Route path="/change-password" element={<ChangePasswordPage />} />
+        <Route 
+          path="/change-password"
+          element={
+            <ProtectedRoute adminOnly={false}>
+              <ChangePasswordPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route path="ch-orders" element={<RecentOrders/>} />
+        <Route path="/success" element={<CheckoutSuccess/>} />
         <Route path="/unauthorized" element={<UnauthorizedPage/>} />
         <Route path="*" element={<NotFound/>} />
       </Routes>

@@ -19,5 +19,5 @@ db.getConnection((err, connection) => {
     console.log("✅ Connected to the database");
     connection.release();
   });
-
+  
 module.exports = db;

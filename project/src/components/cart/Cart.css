@@ -9,6 +9,9 @@ color: #2c3e50;
 .cart-screen {
     padding: 20px;
   }
+
+  .item-layout {
+  }
   
   .cart-items {
     display: flex;
@@ -63,4 +66,7 @@ color: #2c3e50;
     color: #3498db; /* Change details color on hover */
   }
   
+  .payment {
+    margin-left: 3;
+  }
   

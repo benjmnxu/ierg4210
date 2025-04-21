@@ -1,0 +1,82 @@
+.recent-orders-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 1rem;
+    font-family: Arial, sans-serif;
+    color: #333;
+  }
+  
+  .recent-orders-container h2 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    text-align: center;
+  }
+  
+  .recent-orders-loading,
+  .recent-orders-error {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+  }
+  
+  .recent-orders-error {
+    color: #c00;
+  }
+  
+  .recent-orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+  
+  .recent-orders-table th,
+  .recent-orders-table td {
+    border: 1px solid #ddd;
+    padding: 0.75rem;
+    text-align: left;
+  }
+  
+  .recent-orders-table th {
+    background-color: #f9f9f9;
+    font-weight: bold;
+  }
+  
+  .recent-orders-table tbody tr:nth-child(even) {
+    background-color: #fafafa;
+  }
+  
+  .recent-orders-table tbody tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  @media (max-width: 600px) {
+    .recent-orders-table,
+    .recent-orders-table thead,
+    .recent-orders-table tbody,
+    .recent-orders-table th,
+    .recent-orders-table td,
+    .recent-orders-table tr {
+      display: block;
+    }
+  
+    .recent-orders-table tr {
+      margin-bottom: 1rem;
+    }
+  
+    .recent-orders-table td {
+      text-align: right;
+      padding-left: 50%;
+      position: relative;
+    }
+  
+    .recent-orders-table td::before {
+      content: attr(data-label);
+      position: absolute;
+      left: 0;
+      width: 50%;
+      padding-left: 0.75rem;
+      font-weight: bold;
+      text-align: left;
+    }
+  }
+  

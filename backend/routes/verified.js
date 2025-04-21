@@ -1,7 +1,7 @@
 const express = require("express");
 const crypto = require("crypto");
 const { body, validationResult } = require("express-validator");
-const db = require("../utils/db");
+const db = require("../db/db");
 
 const router = express.Router();
 

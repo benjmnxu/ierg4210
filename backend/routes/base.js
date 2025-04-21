@@ -1,6 +1,6 @@
 const express = require("express");
 const { param, validationResult } = require("express-validator");
-const db = require("../utils/db");
+const db = require("../db/db");
 const s3 = require("../utils/s3")
 
 require("dotenv").config();

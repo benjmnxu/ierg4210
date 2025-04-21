@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
+import CheckoutForm from "../checkoutForm/CheckoutForm";
 import "./Cart.css";
 
 const CartScreen = () => {
   const [cart, setCart] = useState([]);
   const [rawCart, setRawCart] = useState([]);
   const [loading, setLoading] = useState(false);
-  // const [totalPrice, setTotalPrice] = useState(0);
-  const [cartFetched, setCartFetched] = useState(false); // Prevents infinite API calls
+  const [cartFetched, setCartFetched] = useState(false);
 
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -65,38 +65,42 @@ const CartScreen = () => {
     return <h2>Your cart is empty.</h2>;
   }
 
-  console.log("C", cart)
+  const total = cart.reduce((sum, it) => sum + it.price * it.quantity, 0);
+
   return (
     <div className="cart-screen">
       <h1>Shopping Cart</h1>
       {loading ? <p>Loading product details...</p> : null}
-      <div className="cart-items">
-        {cart.map((item) => (
-          <div className="cart-item" key={item.pid}>
-            <div>
-              <h2>{item.name || "Loading..."}</h2>
-              <p>Price: ${item.price?.toFixed(2) || "Fetching..."}</p>
-              <div className="quantity-controls">
-                <button onClick={() => handleQuantityChange(item.pid, item.quantity - 1)}>-</button>
-                <input
-                  type="number"
-                  min="0"
-                  max="10000"
-                  value={item.quantity}
-                  onChange={(e) => handleQuantityChange(item.pid, parseInt(e.target.value, 10) || 0)}
-                />
-                <button onClick={() => handleQuantityChange(item.pid, item.quantity + 1)}>+</button>
+      <div className="item-layout">
+        <div className="cart-items">
+          {cart.map((item) => (
+            <div className="cart-item" key={item.pid}>
+              <div>
+                <h2>{item.name || "Loading..."}</h2>
+                <p>Price: ${item.price?.toFixed(2) || "Fetching..."}</p>
+                <div className="quantity-controls">
+                  <button onClick={() => handleQuantityChange(item.pid, item.quantity - 1)}>-</button>
+                  <input
+                    type="number"
+                    min="0"
+                    max="10000"
+                    value={item.quantity}
+                    onChange={(e) => handleQuantityChange(item.pid, parseInt(e.target.value, 10) || 0)}
+                  />
+                  <button onClick={() => handleQuantityChange(item.pid, item.quantity + 1)}>+</button>
+                </div>
+                <button className="remove-btn" onClick={() => handleRemoveFromCart(item.pid)}>
+                  Remove
+                </button>
               </div>
-              <button className="remove-btn" onClick={() => handleRemoveFromCart(item.pid)}>
-                Remove
-              </button>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        <div className="payment">
+          <h2>Total: ${total.toFixed(2)}</h2>
+          <CheckoutForm cart={cart}/>
+        </div>
       </div>
-      <h2>Total: ${cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}</h2>
-
-      <button disabled={loading}>Checkout</button>
     </div>
   );
 };

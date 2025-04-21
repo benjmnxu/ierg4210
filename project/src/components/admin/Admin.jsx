@@ -7,11 +7,11 @@ const AdminPanel = () => {
   const [activeForm, setActiveForm] = useState("insert");
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
+  const [orders, setOrders] = useState([]);            // ← new
   const [editingId, setEditingId] = useState(null);
 
   const [insertForm, setInsertForm] = useState({ catid: "", name: "", price: "", description: "", image: null });
   const [categoryInsert, setCategoryInsert] = useState({ name: "" });
-
   const [deleteId, setDeleteId] = useState("");
   const [categoryDeleteId, setCategoryDeleteId] = useState("");
 
@@ -21,29 +21,24 @@ const AdminPanel = () => {
     return div.innerHTML;
   };
 
+  // fetch helpers
+  const fetchCategories = () =>
+    fetch("/api/categories").then((r) => r.json()).then(setCategories).catch(console.error);
+
+  const fetchProducts = () =>
+    fetch("/api/products").then((r) => r.json()).then(setProducts).catch(console.error);
+
+  const fetchOrders = () =>                                      // ← new
+    secureFetch("/api/admin/orders")                             // adjust endpoint if needed
+      .then((r) => r.json())
+      .then(setOrders)
+      .catch(console.error);
+
   useEffect(() => {
     fetchCategories();
     if (mode === "products") fetchProducts();
+    if (mode === "orders") fetchOrders();                        // ← trigger
   }, [mode]);
-
-  const fetchCategories = () => {
-    fetch("/api/categories")
-      .then((res) => res.json())
-      .then(setCategories)
-      .catch(console.error);
-  };
-
-  const fetchProducts = () => {
-    fetch("/api/products")
-      .then((res) => res.json())
-      .then(setProducts)
-      .catch(console.error);
-  };
-
-  const handleChange = (e, formSetter) => {
-    const { name, value } = e.target;
-    formSetter((prev) => ({ ...prev, [name]: value }));
-  };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -258,6 +253,9 @@ const AdminPanel = () => {
         </button>
         <button className={`toggle-button ${mode === "categories" ? "active" : "inactive"}`} onClick={() => setMode("categories")}>
           Manage Categories
+        </button>
+        <button className={`toggle-button ${mode === "categories" ? "active" : "inactive"}`} onClick={() => setMode("categories")}>
+          View Orders
         </button>
       </div>
 

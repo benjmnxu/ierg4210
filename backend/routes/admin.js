@@ -4,7 +4,7 @@ const multer = require("multer");
 const sharp = require("sharp");
 const { v4: uuidv4 } = require("uuid");
 const AWS = require("aws-sdk");
-const db = require("../utils/db");
+const db = require("../db/db");
 const upload = multer({ storage: multer.memoryStorage() });
 
 require("dotenv").config();

@@ -24,7 +24,6 @@ const Product = () => {
         }
         const data = await response.json();
         setProduct(data[0]);
-        console.log(data[0])
       } catch (err) {
         setError(err.message);
       } finally {

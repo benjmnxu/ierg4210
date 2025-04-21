@@ -3,16 +3,27 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const csrf = require("csurf");
+const bodyParser   = require('body-parser');
 
 const adminRouter = require("./routes/admin");
 const baseRouter = require("./routes/base");
 const verifiedRouter = require("./routes/verified");
-const authRouter = require("./routes/auth")
+const authRouter = require("./routes/auth");
+const paymentsRouter = require("./routes/payments");
+const purchasesRouter = require("./routes/purchases")
+const webhook = require("./routes/webhook");
 const { verifyAuth, requireAdmin } = require("./utils/auth");
 
 require("dotenv").config();
 
 const app = express();
+
+app.use(
+  "/api/webhook", 
+  bodyParser.raw({type: "application/json"}), 
+  webhook
+);
+
 const allowedOrigins = ["http://localhost:5173", "http://13.213.143.57", "https://s36.ierg4210.ie.cuhk.edu.hk"];
 const csrfProtection = csrf({ cookie: false });
 
@@ -48,6 +59,8 @@ app.use(function setCSP(req, res, next) {
 
 app.use("/api", baseRouter);
 app.use("/api", authRouter);
+app.use("/api/payments", paymentsRouter)
+app.use("/api/purchases", purchasesRouter)
 app.use("/api/verified", verifyAuth, verifiedRouter);
 app.use("/api/admin", verifyAuth, requireAdmin, adminRouter);
 

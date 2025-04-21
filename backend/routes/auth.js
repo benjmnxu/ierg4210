@@ -1,7 +1,7 @@
 const express = require("express");
 const crypto = require("crypto");
 const { body, validationResult } = require("express-validator");
-const db = require("../utils/db");
+const db = require("../db/db");
 require("dotenv").config();
 
 const router = express.Router();
@@ -63,12 +63,13 @@ router.post("/logout", (req, res) => {
 
 // SIGNUP
 router.post("/signup", [
-  body("email").isEmail().normalizeEmail().isLength({max:100}),
+  body("email").isEmail().normalizeEmail().isLength({min: 1, max:100}),
   body("password").isLength({ min: 6, max: 100 }).trim(),
-  body("name").trim().escape().isLength({max: 100}),
+  body("name").trim().escape().isLength({min: 1, max: 100}),
   body("admin_code").optional().trim()
 ], (req, res) => {
     const errors = validationResult(req);
+    console.log(errors)
     if (!errors.isEmpty()) return res.status(400).json({ error: "400 Malformed Input (email length < 100, 6 <= password length <= 100, name length <= 100)" });
     const { email, password, name, admin_code } = req.body;
 
