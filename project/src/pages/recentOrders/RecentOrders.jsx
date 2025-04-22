@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "./RecentOrders.css";
 import { secureFetch } from "../../utils/secureFetch";
 

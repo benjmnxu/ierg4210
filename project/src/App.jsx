@@ -40,7 +40,7 @@ function App() {
             </ProtectedRoute>
           } 
         />
-        <Route path="ch-orders" element={<RecentOrders/>} />
+        <Route path="recent-orders" element={<RecentOrders/>} />
         <Route path="/success" element={<CheckoutSuccess/>} />
         <Route path="/unauthorized" element={<UnauthorizedPage/>} />
         <Route path="*" element={<NotFound/>} />

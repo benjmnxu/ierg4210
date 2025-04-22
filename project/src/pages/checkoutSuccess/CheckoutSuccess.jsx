@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function CheckoutSuccess() {
   const { search } = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const session_id = new URLSearchParams(search).get('session_id');
@@ -26,5 +27,15 @@ export default function CheckoutSuccess() {
     verifyAndClear();
   }, [search]);
 
-  return <h1>Thank you for your purchase!</h1>;
+  return (
+    <div className="checkout-success">
+      <h1>Thank you for your purchase!</h1>
+      <button onClick={() => navigate("/recent-orders")}>
+        Your Orders
+      </button>
+      <button onClick={() => navigate("/")}>
+        Home
+      </button>
+    </div>
+  );
 }

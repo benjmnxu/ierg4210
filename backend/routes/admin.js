@@ -5,6 +5,7 @@ const sharp = require("sharp");
 const { v4: uuidv4 } = require("uuid");
 const AWS = require("aws-sdk");
 const db = require("../db/db");
+const { getOrderById } = require("../db/helpers");
 const upload = multer({ storage: multer.memoryStorage() });
 
 require("dotenv").config();
@@ -183,5 +184,57 @@ router.delete("/categories/:id", [
     res.json({ message: "Deleted" });
   });
 });
+
+router.get("/orders", (req, res) => {
+  db.query(
+    `SELECT id, user_id, currency, merchant_email, total_price, created_at
+       FROM orders`,
+    (err, orders) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Failed to load orders" });
+      }
+      if (orders.length === 0) {
+        return res.json([]);
+      }
+
+      const ids = orders.map(o => o.id);
+      db.query(
+        `SELECT order_id, product_id, quantity, unit_price
+           FROM order_items
+          WHERE order_id IN (?)`,
+        [ids],
+        (err2, items) => {
+          if (err2) {
+            console.error(err2);
+            return res.status(500).json({ error: "Failed to load order items" });
+          }
+
+          const itemsByOrder = items.reduce((acc, i) => {
+            (acc[i.order_id] ||= []).push({
+              product_id: i.product_id,
+              quantity:   i.quantity,
+              unit_price: i.unit_price,
+            });
+            return acc;
+          }, {});
+
+          const fullOrders = orders.map(o => ({
+            id:             o.id,
+            user_id:        o.user_id,
+            currency:       o.currency,
+            merchant_email: o.merchant_email,
+            created_at:     o.created_at,
+            total_price:    o.total_price,
+            items:          itemsByOrder[o.id] || []
+          }));
+
+          res.json(fullOrders);
+        }
+      );
+    }
+  );
+});
+
 
 module.exports = router;
