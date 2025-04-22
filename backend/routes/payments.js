@@ -6,8 +6,11 @@ const {
   saveOrder,
   getOrderById,
   getTransaction,
+  CURRENCY,
 } = require('../db/helpers.js');
 const computeDigest = require ("../utils/digest");
+
+require("dotenv").config();
 
 const router = express.Router();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2022-11-15' });
@@ -72,7 +75,7 @@ router.post('/create-checkout-session', async (req, res) => {
     
         return {
           price_data: {
-            currency: 'usd',
+            currency: CURRENCY,
             product_data: {
               name: p.name,
             },
@@ -87,8 +90,8 @@ router.post('/create-checkout-session', async (req, res) => {
       payment_method_types: ['card'],
       line_items,
       mode: 'payment',
-      success_url: `http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url:  `http://localhost:5173/cancel`,
+      success_url: `${process.env.NODE_ENV == "DEV" ? "http://localhost:5173" : "http://s36.ierg4210.ie.cuhk.edu.hk"}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url:  `${process.env.NODE_ENV == "DEV" ? "http://localhost:5173" : "http://s36.ierg4210.ie.cuhk.edu.hk"}/cancel`,
       client_reference_id: orderId.toString(),
       metadata: {
         orderId: orderId.toString(),
