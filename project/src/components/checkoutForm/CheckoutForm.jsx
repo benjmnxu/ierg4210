@@ -1,20 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   useStripe,
 } from '@stripe/react-stripe-js';
 import './CheckoutForm.css';
+import { secureFetch } from '../../utils/secureFetch';
 
-export default function CheckoutForm({ cart }) {
+export default function CheckoutForm({ cart, discount, voucherCode }) {
   const stripe   = useStripe();
-  const [csrfToken, setCsrfToken] = useState('');
   const [status,    setStatus]    = useState('');
-
-  useEffect(() => {
-    fetch('/api/csrf-token', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => setCsrfToken(data.csrfToken))
-      .catch(console.error);
-  }, []);
+  const navigate = useNavigate();
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -23,28 +18,30 @@ export default function CheckoutForm({ cart }) {
     setStatus('Creating order…');
 
     try {
-      const orderRes = await fetch('/api/payments/order', {
-        method: 'POST',
-        credentials: 'include',
+      const orderRes = await secureFetch("/api/payments/order", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'CSRF-Token': csrfToken
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({ items: cart })
+        body: JSON.stringify({ items: cart, discount, voucherCode })
       });
-      const {orderId, digest} = await orderRes.json();
-
-      const sessionRes = await fetch('/api/payments/create-checkout-session', {
-        method: 'POST',
-        credentials: 'include',
+      const { orderId, digest } = await orderRes.json();
+  
+      const sessionRes = await secureFetch("/api/payments/create-checkout-session", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'CSRF-Token': csrfToken
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({ orderId, digest })
       });
-      const { sessionId, error } = await sessionRes.json();
-      if (error) return setStatus(`Error: ${error}`)
+      const { sessionId, free, error } = await sessionRes.json();
+
+      if (error) return setStatus(`Error: there was an error with Checkout`);
+
+      if (free) {
+        navigate("/success");
+        return;
+      }
 
       const { error: stripeError } = await stripe.redirectToCheckout({
         sessionId
@@ -60,14 +57,15 @@ export default function CheckoutForm({ cart }) {
     }
   };
 
-  const total = (cart.reduce((sum, i) => sum + i.price * i.quantity, 0)).toFixed(2);
+  const subtotal = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const total = Math.max(0.00, (subtotal - discount).toFixed(2));
 
   return (
     <div className="checkout-container">
       <button
         type="button"
         className="checkout-button"
-        disabled={!stripe || !csrfToken}
+        disabled={!stripe}
         onClick={handleSubmit}
       >
         Pay ${total}

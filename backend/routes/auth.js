@@ -44,8 +44,6 @@ router.post("/login", [
         }
     });
     });
-
-// LOGOUT
 router.post("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) return res.status(500).json({ error: "Logout failed" });
@@ -69,7 +67,6 @@ router.post("/signup", [
   body("admin_code").optional().trim()
 ], (req, res) => {
     const errors = validationResult(req);
-    console.log(errors)
     if (!errors.isEmpty()) return res.status(400).json({ error: "400 Malformed Input (email length < 100, 6 <= password length <= 100, name length <= 100)" });
     const { email, password, name, admin_code } = req.body;
 

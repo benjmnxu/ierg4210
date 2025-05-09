@@ -3,7 +3,7 @@ const db = require('./db');
 const MERCHANT_EMAIL = "email@mail.com";
 const CURRENCY       = 'USD';
 
-function saveOrder(userId, items, total_price, salt, digest) {
+function saveOrder(userId, items, total_price, salt, digest, voucherCode, validatedDiscount) {
   return new Promise((resolve, reject) => {
     db.getConnection((err, conn) => {
       if (err) return reject(err);
@@ -14,12 +14,12 @@ function saveOrder(userId, items, total_price, salt, digest) {
         }
         const orderSql = `
           INSERT INTO orders
-            (user_id, currency, merchant_email, salt, total_price, digest)
-          VALUES (?, ?, ?, ?, ?, ?)
+            (user_id, currency, merchant_email, salt, total_price, digest, voucher_code, discount_cents)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
         conn.query(
           orderSql,
-          [userId, CURRENCY, MERCHANT_EMAIL, salt, total_price, digest],
+          [userId, CURRENCY, MERCHANT_EMAIL, salt, total_price, digest, voucherCode, validatedDiscount],
           (err, result) => {
             if (err) {
               return conn.rollback(() => {
@@ -75,7 +75,7 @@ function getOrderById(orderId) {
   return new Promise((resolve, reject) => {
     // 1) load the order header
     db.query(
-      `SELECT id, user_id, currency, merchant_email, salt, total_price
+      `SELECT id, user_id, currency, merchant_email, salt, total_price, voucher_code, discount_cents
          FROM orders WHERE id = ?`,
       [orderId],
       (err, rows) => {
@@ -149,6 +149,15 @@ function getTransaction(orderId) {
   });
 }
 
+function getVoucher(code) {
+  return new Promise((resolve, reject) => {
+    db.query("SELECT * FROM vouchers WHERE code = ? LIMIT 1", [code], (err, results) => {
+      if (err) return reject(err);
+      resolve(results[0]); 
+    });
+  });
+}
+
 // Export all helpers
 module.exports = {
   saveOrder,
@@ -157,6 +166,7 @@ module.exports = {
   markOrderPaid,
   saveTransaction,
   getTransaction,
+  getVoucher,
   MERCHANT_EMAIL,
   CURRENCY
 };

@@ -11,6 +11,7 @@ const verifiedRouter = require("./routes/verified");
 const authRouter = require("./routes/auth");
 const paymentsRouter = require("./routes/payments");
 const purchasesRouter = require("./routes/purchases")
+const voucherRouter = require("./routes/voucher");
 const webhook = require("./routes/webhook");
 const { verifyAuth, requireAdmin } = require("./utils/auth");
 
@@ -61,6 +62,7 @@ app.use("/api", baseRouter);
 app.use("/api", authRouter);
 app.use("/api/payments", paymentsRouter)
 app.use("/api/purchases", purchasesRouter)
+app.use("/api/voucher", voucherRouter);
 app.use("/api/verified", verifyAuth, verifiedRouter);
 app.use("/api/admin", verifyAuth, requireAdmin, adminRouter);
 

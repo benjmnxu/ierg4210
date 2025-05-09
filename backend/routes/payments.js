@@ -5,7 +5,9 @@ const {
   getProductByPid,
   saveOrder,
   getOrderById,
+  saveTransaction,
   getTransaction,
+  getVoucher,
   CURRENCY,
 } = require('../db/helpers.js');
 const computeDigest = require ("../utils/digest");
@@ -38,13 +40,15 @@ router.get('/verify', async (req, res) => {
 });
 
 router.post('/order', async (req, res) => {
-  const items = req.body.items;
+  const { items, voucherCode, discount } = req.body;
   const userId = req.session.uid ?? null;
+
   let total_price = 0;
   const enrichedItems = [];
+
   for (let { pid, quantity } of items) {
     const p = await getProductByPid(pid);
-    centsPrice = p.price * 100;
+    const centsPrice = p.price * 100;
     total_price += centsPrice * quantity;
 
     enrichedItems.push({
@@ -54,11 +58,29 @@ router.post('/order', async (req, res) => {
     });
   }
 
+  let validatedDiscount = 0;
+  if (voucherCode) {
+    const voucher = await getVoucher(voucherCode);
+    if (!voucher) {
+      return res.status(400).json({ error: 'Invalid voucher code' });
+    }
+
+    validatedDiscount = Math.round(parseFloat(voucher.discount_amount) * 100);
+
+    if (validatedDiscount !== Math.round(discount * 100)) {
+      return res.status(400).json({ error: 'Discount mismatch' });
+    }
+
+    total_price = Math.max(0, total_price - validatedDiscount);
+  }
+
   const salt = crypto.randomBytes(16).toString('hex');
   const digest = computeDigest(enrichedItems, total_price, salt);
-  const { orderId } = await saveOrder(userId, enrichedItems, total_price, salt, digest, false);
+  const { orderId } = await saveOrder(userId, enrichedItems, total_price, salt, digest, voucherCode ?? null, validatedDiscount);
+
   res.json({ orderId, digest });
-})
+});
+
 router.post('/create-checkout-session', async (req, res) => {
   try {
     const { orderId, digest } = req.body;
@@ -67,11 +89,29 @@ router.post('/create-checkout-session', async (req, res) => {
     if (!order) {
       return res.status(400).json({ error: 'Order not found or not pending' });
     }
+    if (order.total_price === 0) {
+      const nonce = crypto.randomBytes(16).toString('hex');
+      await saveTransaction({
+        orderId,
+        transactionId: "FREE_ORDER" + nonce,
+        amount: 0,
+        currency: "usd",
+        customerEmail: order.email ?? "free@order.local"
+      });
+      return res.json({ sessionId: null, free: true });
+    }
+
+    let discount = order.discount_cents;
 
     const line_items = await Promise.all(
       order.items.map(async ({ product_id, quantity }) => {
         const p = await getProductByPid(product_id);
-        const unitAmount = Math.round(parseFloat(p.price) * 100);
+        let unitAmount = Math.round(parseFloat(p.price) * 100);
+        if (discount && discount > 0) {
+          const reduceBy = Math.min(unitAmount, discount);
+          unitAmount -= reduceBy;
+          discount -= reduceBy;
+        }
     
         return {
           price_data: {
@@ -85,6 +125,19 @@ router.post('/create-checkout-session', async (req, res) => {
         };
       })
     );
+
+    if (order.discount_cents && order.discount_cents > 0) {
+      line_items.push({
+        price_data: {
+          currency: CURRENCY,
+          product_data: {
+            name: `Voucher (${order.voucher_code})`,
+          },
+          unit_amount: 0,
+        },
+        quantity: 1,
+      });
+    }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],

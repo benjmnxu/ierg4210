@@ -7,6 +7,38 @@ const CartScreen = () => {
   const [rawCart, setRawCart] = useState([]);
   const [loading, setLoading] = useState(false);
   const [cartFetched, setCartFetched] = useState(false);
+  const [voucherCode, setVoucherCode] = useState('');
+  const [discount, setDiscount] = useState(0);
+  const [voucherStatus, setVoucherStatus] = useState('');
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const vcode = params.get("vcode");
+    if (vcode) {
+      setVoucherCode(vcode);
+      validateVoucher(vcode);
+    }
+  }, []);
+
+  const validateVoucher = async (code) => {
+    if (!code) {
+      setDiscount(0);
+      setVoucherStatus('');
+      return;
+    }
+
+    const res = await fetch(`/api/voucher/validate?code=${encodeURIComponent(code)}`);
+    const data = await res.json();
+    if (data.valid) {
+      const discount = Number(data.discount)
+      setDiscount(discount);
+      setVoucherStatus(`Voucher applied: -$${discount.toFixed(2)}`);
+    } else {
+      setDiscount(0);
+      setVoucherStatus('Invalid or expired voucher');
+    }
+  };
+
 
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -65,7 +97,7 @@ const CartScreen = () => {
     return <h2>Your cart is empty.</h2>;
   }
 
-  const total = cart.reduce((sum, it) => sum + it.price * it.quantity, 0);
+  const total = Math.max(0, cart.reduce((sum, it) => sum + it.price * it.quantity, 0) - discount);
 
   return (
     <div className="cart-screen">
@@ -96,13 +128,25 @@ const CartScreen = () => {
             </div>
           ))}
         </div>
+  
+        <div className="voucher-section">
+          <input
+            type="text"
+            placeholder="Enter voucher code"
+            value={voucherCode}
+            onChange={(e) => setVoucherCode(e.target.value)}
+            onBlur={() => validateVoucher(voucherCode)}
+          />
+          <p className="voucher-text">{voucherStatus}</p>
+        </div>
+
         <div className="payment">
           <h2>Total: ${total.toFixed(2)}</h2>
-          <CheckoutForm cart={cart}/>
+          <CheckoutForm cart={cart} discount={discount} voucherCode={voucherCode} />
         </div>
       </div>
     </div>
   );
-};
+};  
 
 export default CartScreen;
