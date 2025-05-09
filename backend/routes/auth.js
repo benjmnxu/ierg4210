@@ -118,7 +118,7 @@ router.get("/auth/google/callback", passport.authenticate("google", { failureRed
     req.session.isAdmin = req.user.is_admin;
     req.session.authProvider = "google";
     
-    res.redirect(process.env.NODE_ENV == "dev" ? "http://localhost:5173" : process.env.GOOGLE_CALLBACK_URL);
+    res.redirect(process.env.NODE_ENV == "dev" ? "http://localhost:5173" : "https://s36.ierg4210.ie.cuhk.edu.hk/");
   });
 
 module.exports = router;
