@@ -5,6 +5,7 @@ const session = require("express-session");
 const csrf = require("csurf");
 const bodyParser   = require('body-parser');
 
+const passport = require("./passport");
 const adminRouter = require("./routes/admin");
 const baseRouter = require("./routes/base");
 const verifiedRouter = require("./routes/verified");
@@ -57,6 +58,8 @@ app.use(function setCSP(req, res, next) {
   );
   next();
 });
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use("/api", baseRouter);
 app.use("/api", authRouter);

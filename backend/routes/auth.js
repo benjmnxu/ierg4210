@@ -1,5 +1,6 @@
 const express = require("express");
 const crypto = require("crypto");
+const passport = require("../passport");
 const { body, validationResult } = require("express-validator");
 const db = require("../db/db");
 require("dotenv").config();
@@ -36,6 +37,7 @@ router.post("/login", [
             req.session.uid = user.uid;
             req.session.email = user.email;
             req.session.isAdmin = user.is_admin;
+            req.session.authProvider = "local";
 
             return res.json({ message: "Login successful" });
         });
@@ -105,5 +107,18 @@ router.post("/signup", [
         });
     });
 });
+
+
+router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+
+router.get("/auth/google/callback", passport.authenticate("google", { failureRedirect: "/login" }),
+  (req, res) => {
+    req.session.uid = req.user.uid;
+    req.session.email = req.user.email;
+    req.session.isAdmin = req.user.is_admin;
+    req.session.authProvider = "google";
+    
+    res.redirect(process.env.NODE_ENV == "dev"? "http://localhost:5173" : process.env.GOOGLE_CALLBACK_URL);
+  });
 
 module.exports = router;

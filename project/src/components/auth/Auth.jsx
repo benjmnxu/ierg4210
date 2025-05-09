@@ -11,6 +11,11 @@ function AuthPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
+
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:3000/api/auth/google";
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -120,6 +125,13 @@ function AuthPage() {
           </p>
         )}
       </div>
+
+      <button
+        onClick={handleGoogleLogin}
+        className="google-login"
+      >
+        Login with Google
+      </button>
     </div>
   );
 }

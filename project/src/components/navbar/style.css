@@ -14,12 +14,19 @@ body {
   z-index: 1000;
 }
 
-.flex-container {
+.flex-container.navbar-content {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: flex-start;
-  gap: 20px;
-  width: 100%;
+}
+
+.left-nav, .right-nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+.right-nav {
+  padding-right: 2rem; 
 }
 
 /* Logo */

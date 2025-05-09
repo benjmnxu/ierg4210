@@ -86,89 +86,62 @@ function Navbar() {
 
   return (
     <nav className="navbar">
-      <div className="flex-container">
-        <a href="/" className="button-link">
-          Home/All Products
-        </a>
+      <div className="flex-container navbar-content">
+        <div className="left-nav">
+          <a href="/" className="button-link">Home/All Products</a>
 
-        <div className="dropdown">
-          <button
-            className="dropdown-button"
-            id="origin-button"
-            onClick={() => setOriginDropdownOpen((prev) => !prev)}
-          >
-            Origins ▼
-          </button>
-          <div
-            className={`dropdown-menu ${originDropdownOpen ? "open" : ""}`}
-            id="origin-dropdown"
-          >
-            {!loading &&
-              categories?.map((category) => (
-                <a key={category.catid} href={`/origin/${category.catid}`}>
-                  {category.name}
-                </a>
-              ))}
+          <div className="dropdown">
+            <button
+              className="dropdown-button"
+              id="origin-button"
+              onClick={() => setOriginDropdownOpen((prev) => !prev)}
+            >
+              Origins ▼
+            </button>
+            <div
+              className={`dropdown-menu ${originDropdownOpen ? "open" : ""}`}
+              id="origin-dropdown"
+            >
+              {!loading &&
+                categories?.map((category) => (
+                  <a key={category.catid} href={`/origin/${category.catid}`}>
+                    {category.name}
+                  </a>
+                ))}
+            </div>
           </div>
         </div>
 
-        <form
-            className="search-form"
-            onSubmit={(e) => {
-                e.preventDefault();
-                console.log("Search submitted (in the future)");
-              }}
-            >
-            <div className="input-group">
-                <input
-                type="text"
-                placeholder="Search..."
-                className="search-input"
-                id="searchQuery"
-                />
-                <button type="submit" className="search-button">
-                Search
-                </button>
-            </div>
-        </form>
+        <div className="right-nav">
+          <a href="/cart" className="button-link">Your Cart/Checkout</a>
+          <a href="/admin" className="button-link">Admin Panel</a>
 
-        <a href="/cart" className="button-link">
-          Your Cart/Checkout
-        </a>
-        <a href="/admin" className="button-link">
-          Admin Panel
-        </a>
-
-        {user ? (
+          {user ? (
             <div className="dropdown">
-                <button
-                    className="dropdown-button"
-                    id="user-button"
-                    onClick={() => setUserDropdownOpen((prev) => !prev)}
-                >
-                    Welcome, {user.name} ▼
-                </button>
-                <div
-                    className={`dropdown-menu ${userDropdownOpen ? "open" : ""}`}
-                    id="user-dropdown"
-                >
-                    <button onClick={handleLogout} className="dropdown-item">
-                        Logout
-                    </button>
-                    <a href = "/change-password">
-                        Change Password
-                    </a>
-                    <a href = "/recent-orders">
-                        Recent Orders
-                    </a>
-                </div>
+              <button
+                className="dropdown-button"
+                id="user-button"
+                onClick={() => setUserDropdownOpen((prev) => !prev)}
+              >
+                Welcome, {user.name} ▼
+              </button>
+              <div
+                className={`dropdown-menu ${userDropdownOpen ? "open" : ""}`}
+                id="user-dropdown"
+              >
+                <button onClick={handleLogout} className="dropdown-item">Logout</button>
+                {user.authProvider !== "google" && (
+                  <a href="/change-password" className="dropdown-item">Change Password</a>
+                )}
+                <a href="/recent-orders">Recent Orders</a>
+              </div>
             </div>
-        ) : (
-          <a href="/login" className="button-link">
-            Login
-          </a>
-        )}
+          ) : (
+            <a href="/login" className="button-link">Login</a>
+          )}
+        </div>
       </div>
+
     </nav>
   );
 }

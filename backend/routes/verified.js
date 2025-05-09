@@ -5,7 +5,6 @@ const db = require("../db/db");
 
 const router = express.Router();
 
-// GET /me
 router.get("/me", (req, res) => {
   if (!req.session.uid) {
     return res.status(401).json({ error: "Not authenticated" });
@@ -22,6 +21,7 @@ router.get("/me", (req, res) => {
       uid: req.session.uid,
       name: user.name,
       isAdmin: user.is_admin,
+      authProvider: req.session.authProvider || "local"
     });
   });
 });
@@ -43,6 +43,10 @@ router.post(
   (req, res) => {
     if (!req.session.uid) {
       return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    if (req.session.authProvider !== "local") {
+      return res.status(403).json({ error: "Password change not allowed for Google users" });
     }
 
     const errors = validationResult(req);
