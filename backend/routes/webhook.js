@@ -31,9 +31,7 @@ router.post('/', async (req, res) => {
     } else {
       const existing = await getOrderById(orderId);
 
-      // 3) guard: skip if not found or already paid
       if (existing) {
-        // 4) recompute digest *exactly* as you did in /order
         const itemsForDigest = await Promise.all(
             existing.items.map(async i => {
               return {

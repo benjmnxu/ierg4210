@@ -13,7 +13,7 @@ function AuthPage() {
 
 
   const handleGoogleLogin = () => {
-    window.location.href = "https://s36.ierg4210.ie.cuhk.edu.hk./api/auth/google";
+    window.location.href = "https://s36.ierg4210.ie.cuhk.edu.hk/api/auth/google";
   };
 
   const handleSubmit = async (e) => {

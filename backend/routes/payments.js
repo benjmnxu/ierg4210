@@ -107,11 +107,6 @@ router.post('/create-checkout-session', async (req, res) => {
       order.items.map(async ({ product_id, quantity }) => {
         const p = await getProductByPid(product_id);
         let unitAmount = Math.round(parseFloat(p.price) * 100);
-        if (discount && discount > 0) {
-          const reduceBy = Math.min(unitAmount, discount);
-          unitAmount -= reduceBy;
-          discount -= reduceBy;
-        }
     
         return {
           price_data: {
@@ -126,22 +121,20 @@ router.post('/create-checkout-session', async (req, res) => {
       })
     );
 
-    if (order.discount_cents && order.discount_cents > 0) {
-      line_items.push({
-        price_data: {
-          currency: CURRENCY,
-          product_data: {
-            name: `Voucher (${order.voucher_code})`,
-          },
-          unit_amount: 0,
-        },
-        quantity: 1,
-      });
+    let coupon;
+
+    if (discount) {
+      coupon = await stripe.coupons.create({
+        amount_off: discount,
+        currency: CURRENCY,
+        duration: 'once',
+      })
     }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items,
+      discounts: coupon ? [{ coupon: coupon.id }] : undefined,
       mode: 'payment',
       success_url: `${process.env.NODE_ENV == "dev" ? "http://localhost:5173" : "http://s36.ierg4210.ie.cuhk.edu.hk"}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:  `${process.env.NODE_ENV == "dev" ? "http://localhost:5173" : "http://s36.ierg4210.ie.cuhk.edu.hk"}/cancel`,
