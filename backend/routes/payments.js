@@ -143,8 +143,8 @@ router.post('/create-checkout-session', async (req, res) => {
       payment_method_types: ['card'],
       line_items,
       mode: 'payment',
-      success_url: `${process.env.NODE_ENV == "DEV" ? "http://localhost:5173" : "http://s36.ierg4210.ie.cuhk.edu.hk"}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url:  `${process.env.NODE_ENV == "DEV" ? "http://localhost:5173" : "http://s36.ierg4210.ie.cuhk.edu.hk"}/cancel`,
+      success_url: `${process.env.NODE_ENV == "dev" ? "http://localhost:5173" : "http://s36.ierg4210.ie.cuhk.edu.hk"}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url:  `${process.env.NODE_ENV == "dev" ? "http://localhost:5173" : "http://s36.ierg4210.ie.cuhk.edu.hk"}/cancel`,
       client_reference_id: orderId.toString(),
       metadata: {
         orderId: orderId.toString(),
