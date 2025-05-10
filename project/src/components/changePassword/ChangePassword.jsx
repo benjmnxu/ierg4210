@@ -24,6 +24,9 @@ function ChangePasswordPage() {
     try {
       const response = await secureFetch("/api/verified/change-password", {
         method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
             currentPassword: currentPassword,
             newPassword: newPassword

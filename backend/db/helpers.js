@@ -158,7 +158,6 @@ function getVoucher(code) {
   });
 }
 
-// Export all helpers
 module.exports = {
   saveOrder,
   getProductByPid,

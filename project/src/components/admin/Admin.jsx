@@ -43,7 +43,6 @@ const AdminPanel = () => {
     secureFetch("/api/admin/orders")
       .then((r) => r.json())
       .then(r => {
-        console.log(r);
         setOrders(r);
       })
       .catch(console.error);

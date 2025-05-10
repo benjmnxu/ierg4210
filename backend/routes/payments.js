@@ -89,7 +89,7 @@ router.post('/create-checkout-session', async (req, res) => {
     if (!order) {
       return res.status(400).json({ error: 'Order not found or not pending' });
     }
-    if (order.total_price === 0) {
+    if (order.total_price - order.discount_cents <= 0) {
       const nonce = crypto.randomBytes(16).toString('hex');
       await saveTransaction({
         orderId,
@@ -100,8 +100,6 @@ router.post('/create-checkout-session', async (req, res) => {
       });
       return res.json({ sessionId: null, free: true });
     }
-
-    let discount = order.discount_cents;
 
     const line_items = await Promise.all(
       order.items.map(async ({ product_id, quantity }) => {

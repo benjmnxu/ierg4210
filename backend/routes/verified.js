@@ -45,7 +45,7 @@ router.post(
       return res.status(401).json({ error: "Not authenticated" });
     }
 
-    if (req.session.authProvider !== "local") {
+    if (req.session.authProvider === "google") {
       return res.status(403).json({ error: "Password change not allowed for Google users" });
     }
 

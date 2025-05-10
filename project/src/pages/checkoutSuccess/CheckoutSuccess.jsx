@@ -15,7 +15,6 @@ export default function CheckoutSuccess() {
           credentials: 'include'
         });
         const data = await res.json();
-        console.log('verification response:', data);
         if (data.paid) {
           localStorage.removeItem('cart');
         }

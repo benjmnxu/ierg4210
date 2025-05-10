@@ -67,7 +67,6 @@ router.post('/', async (req, res) => {
           return res.status(400).send('Digest verification failed');
         }
 
-        // await markOrderPaid(orderId, session.payment_intent);
         await saveTransaction({
           orderId,
           transactionId: session.payment_intent,
